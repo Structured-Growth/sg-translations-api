@@ -16,18 +16,35 @@ const handlerOpts = {
 export const router = Router();
 const pathPrefix = process.env.URI_PATH_PREFIX || '';
 
+//TranslationsController
+router.get(pathPrefix + '/v1/translations', handleRequest(Controllers.TranslationsController, "search", handlerOpts));
+router.get(pathPrefix + '/v1/translations/:translationId', handleRequest(Controllers.TranslationsController, "get", handlerOpts));
+router.put(pathPrefix + '/v1/translations/:translationId', handleRequest(Controllers.TranslationsController, "update", handlerOpts));
+
+//TokensController
+router.get(pathPrefix + '/v1/tokens', handleRequest(Controllers.TokensController, "search", handlerOpts));
+router.get(pathPrefix + '/v1/tokens/:tokenId', handleRequest(Controllers.TokensController, "get", handlerOpts));
+
 //SystemController
 router.post(pathPrefix + '/v1/system/migrate', handleRequest(Controllers.SystemController, "migrate", handlerOpts));
 
 //PingController
 router.get(pathPrefix + '/v1/ping/alive', handleRequest(Controllers.PingController, "pingGet", handlerOpts));
 
-//ExampleController
-router.get(pathPrefix + '/v1/examples', handleRequest(Controllers.ExampleController, "search", handlerOpts));
-router.post(pathPrefix + '/v1/examples', handleRequest(Controllers.ExampleController, "create", handlerOpts));
-router.get(pathPrefix + '/v1/examples/:exampleId', handleRequest(Controllers.ExampleController, "get", handlerOpts));
-router.put(pathPrefix + '/v1/examples/:exampleId', handleRequest(Controllers.ExampleController, "update", handlerOpts));
-router.delete(pathPrefix + '/v1/examples/:exampleId', handleRequest(Controllers.ExampleController, "delete", handlerOpts));
+//ClientsController
+router.get(pathPrefix + '/v1/clients', handleRequest(Controllers.ClientsController, "search", handlerOpts));
+router.post(pathPrefix + '/v1/clients', handleRequest(Controllers.ClientsController, "create", handlerOpts));
+router.get(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "get", handlerOpts));
+router.put(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "update", handlerOpts));
+router.delete(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "delete", handlerOpts));
+router.get(pathPrefix + '/v1/clients/:clientId/:locale', handleRequest(Controllers.ClientsController, "getLocalizedMessages", handlerOpts));
+router.post(pathPrefix + '/v1/clients/:clientId/translate', handleRequest(Controllers.ClientsController, "createTranslation", handlerOpts));
+router.post(pathPrefix + '/v1/clients/:clientId/upload', handleRequest(Controllers.ClientsController, "uploadTranslation", handlerOpts));
+
+//JobsController
+router.get(pathPrefix + '/v1/jobs', handleRequest(Controllers.JobsController, "search", handlerOpts));
+router.get(pathPrefix + '/v1/jobs/:jobId', handleRequest(Controllers.JobsController, "get", handlerOpts));
+router.delete(pathPrefix + '/v1/jobs/:jobId', handleRequest(Controllers.JobsController, "delete", handlerOpts));
 
 //ResolverController
 router.get(pathPrefix + '/v1/resolver/resolve', handleRequest(Controllers.ResolverController, "resolve", handlerOpts));
@@ -36,13 +53,24 @@ router.get(pathPrefix + '/v1/resolver/models', handleRequest(Controllers.Resolve
 
 // map is required for correct resolving action by route
 export const actionToRouteMap = {
+	"TranslationsController.search": 'get /v1/translations',
+	"TranslationsController.get": 'get /v1/translations/:translationId',
+	"TranslationsController.update": 'put /v1/translations/:translationId',
+	"TokensController.search": 'get /v1/tokens',
+	"TokensController.get": 'get /v1/tokens/:tokenId',
 	"SystemController.migrate": 'post /v1/system/migrate',
 	"PingController.pingGet": 'get /v1/ping/alive',
-	"ExampleController.search": 'get /v1/examples',
-	"ExampleController.create": 'post /v1/examples',
-	"ExampleController.get": 'get /v1/examples/:exampleId',
-	"ExampleController.update": 'put /v1/examples/:exampleId',
-	"ExampleController.delete": 'delete /v1/examples/:exampleId',
+	"ClientsController.search": 'get /v1/clients',
+	"ClientsController.create": 'post /v1/clients',
+	"ClientsController.get": 'get /v1/clients/:clientId',
+	"ClientsController.update": 'put /v1/clients/:clientId',
+	"ClientsController.delete": 'delete /v1/clients/:clientId',
+	"ClientsController.getLocalizedMessages": 'get /v1/clients/:clientId/:locale',
+	"ClientsController.createTranslation": 'post /v1/clients/:clientId/translate',
+	"ClientsController.uploadTranslation": 'post /v1/clients/:clientId/upload',
+	"JobsController.search": 'get /v1/jobs',
+	"JobsController.get": 'get /v1/jobs/:jobId',
+	"JobsController.delete": 'delete /v1/jobs/:jobId',
 	"ResolverController.resolve": 'get /v1/resolver/resolve',
 	"ResolverController.actions": 'get /v1/resolver/actions',
 	"ResolverController.models": 'get /v1/resolver/models',

@@ -1,0 +1,13 @@
+import { joi } from "@structured-growth/microservice-sdk";
+import { CommonSearchParamsValidator } from "./common-search-params.validator";
+
+export const TranslationSearchParamsValidator = joi.object({
+	query: joi
+		.object({
+			orgId: joi.number().positive().label("Organization Id"),
+			tokenId: joi.number().positive().label("Token Id"),
+			clientId: joi.number().positive().label("Client Id"),
+			locales: joi.array().items(joi.string().max(15)).label("Locale"),
+		})
+		.concat(CommonSearchParamsValidator),
+});
