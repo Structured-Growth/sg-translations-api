@@ -10,7 +10,7 @@ import Client from "./client";
 export interface JobAttributes extends Omit<DefaultModelInterface, keyof BelongsToAccountInterface> {
 	clientId: number;
 	translator: string;
-	status: "completed" | "inProgress" | "error";
+	status: "completed" | "in_progress" | "error";
 	locales: string[];
 	numberTokens: number;
 	numberTranslations: number;
@@ -18,8 +18,10 @@ export interface JobAttributes extends Omit<DefaultModelInterface, keyof Belongs
 }
 
 export interface JobCreationAttributes
-	extends Omit<JobAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {
-}
+	extends Omit<JobAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {}
+
+export interface JobUpdateAttributes
+	extends Partial<Pick<JobAttributes, "status" | "numberTokens" | "numberTranslations">> {}
 
 @Table({
 	tableName: "jobs",
@@ -27,7 +29,6 @@ export interface JobCreationAttributes
 	underscored: true,
 })
 export class Job extends Model<JobAttributes, JobCreationAttributes> implements JobAttributes {
-
 	@Column
 	orgId: number;
 
@@ -60,11 +61,23 @@ export class Job extends Model<JobAttributes, JobCreationAttributes> implements 
 	launchType: JobAttributes["launchType"];
 
 	static get arnPattern(): string {
-		return [container.resolve("appPrefix"), "<region>", "<orgId>", "<accountId>", "clientsId/<clientId>/jobsId/<jobId>"].join(":");
+		return [
+			container.resolve("appPrefix"),
+			"<region>",
+			"<orgId>",
+			"<accountId>",
+			"clients/<clientId>/jobs/<jobId>",
+		].join(":");
 	}
 
 	get arn(): string {
-		return [container.resolve("appPrefix"), this.region, this.orgId, `-`, `clientsId/${this.clientId}/jobsId/${this.id}`].join(":");
+		return [
+			container.resolve("appPrefix"),
+			this.region,
+			this.orgId,
+			`-`,
+			`clients/${this.clientId}/jobs/${this.id}`,
+		].join(":");
 	}
 }
 

@@ -16,16 +16,19 @@ export interface TranslationAttributes extends Omit<DefaultModelInterface, keyof
 }
 
 export interface TranslationCreationAttributes
-	extends Omit<TranslationAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {
-}
+	extends Omit<TranslationAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {}
+
+export interface TranslationUpdateAttributes extends Partial<Pick<TranslationAttributes, "text">> {}
 
 @Table({
 	tableName: "translations",
 	timestamps: true,
 	underscored: true,
 })
-export class Translation extends Model<TranslationAttributes, TranslationCreationAttributes> implements TranslationAttributes {
-
+export class Translation
+	extends Model<TranslationAttributes, TranslationCreationAttributes>
+	implements TranslationAttributes
+{
 	@Column
 	orgId: number;
 
@@ -53,11 +56,23 @@ export class Translation extends Model<TranslationAttributes, TranslationCreatio
 	text: string;
 
 	static get arnPattern(): string {
-		return [container.resolve("appPrefix"), "<region>", "<orgId>", "<accountId>", "clientsId/<clientId>/tokensId/<tokenId>/translationsId/<translationId>"].join(":");
+		return [
+			container.resolve("appPrefix"),
+			"<region>",
+			"<orgId>",
+			"<accountId>",
+			"clients/<clientId>/tokens/<tokenId>/translations/<translationId>",
+		].join(":");
 	}
 
 	get arn(): string {
-		return [container.resolve("appPrefix"), this.region, this.orgId, `-`, `clientsId/${this.clientId}/tokensId/${this.tokenId}/translationsId/${this.id}`].join(":");
+		return [
+			container.resolve("appPrefix"),
+			this.region,
+			this.orgId,
+			`-`,
+			`clients/${this.clientId}/tokens/${this.tokenId}/translations/${this.id}`,
+		].join(":");
 	}
 }
 

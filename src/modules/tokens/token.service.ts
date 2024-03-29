@@ -10,18 +10,21 @@ import { TokenFindDifferenceParamsInterface } from "../../interfaces/token-fine-
 export class TokenService {
 	constructor(
 		@inject("TokenRepository") private tokenRepository: TokenRepository,
-		@inject("TranslationService") private translationService: TranslationService,
+		@inject("TranslationService") private translationService: TranslationService
 	) {}
 
 	public async create(params: TokenCreateBodyInterface): Promise<Token> {
 		const token = params.token;
-		const count = await Token.count({
+		const [countResult]: { count: number }[] = await Token.count({
 			where: { token },
+			group: [],
 		});
+
+		const count = countResult[0]?.count || 0;
 
 		if (count > 0) {
 			throw new ValidationError({
-				title: "Token with the same name is already exist",
+				token: "Token with the same name is already exist",
 			});
 		}
 
@@ -35,8 +38,8 @@ export class TokenService {
 
 	public async createMultiple(params: TokenCreateBodyInterface[]): Promise<TokenAttributes[]> {
 		return Token.sequelize.transaction(async (transaction) => {
-			const tokens = await Token.bulkCreate(params, { transaction });
-			return tokens.map(token => token.dataValues);
+			return await Token.bulkCreate(params, { transaction });
+			// return tokens.map((token) => token.dataValues);
 		});
 	}
 
@@ -65,36 +68,38 @@ export class TokenService {
 			});
 
 			if (tokens.length > 0) {
-				return tokens.map(token => token.dataValues);
+				return tokens.map((token) => token.dataValues);
 			} else {
 				return [];
 			}
 		});
 	}
 
-	public findDifference(
-		params: TokenFindDifferenceParamsInterface
-	): { newTokens: string[]; oldTokens: number[]; commonTokens: { token: string; id: number }[] } {
+	public findDifference(params: TokenFindDifferenceParamsInterface): {
+		newTokens: string[];
+		unusedTokens: number[];
+		commonTokens: { token: string; id: number }[];
+	} {
 		let newTokens: string[] = [];
-		let oldTokens: number[] = [];
+		let unusedTokens: number[] = [];
 		let commonTokens: { token: string; id: number }[] = [];
 
-		const oldTokensSet = params.oldArray.map(item => item.token);
+		const unusedTokensSet = params.oldArray.map((item) => item.token);
 
 		for (let i = 0; i < params.newArray.length; i++) {
-			if (!oldTokensSet.includes(params.newArray[i])) {
+			if (!unusedTokensSet.includes(params.newArray[i])) {
 				newTokens.push(params.newArray[i]);
 			}
 		}
 
 		for (let i = 0; i < params.oldArray.length; i++) {
 			if (!params.newArray.includes(params.oldArray[i].token)) {
-				oldTokens.push(params.oldArray[i].id);
+				unusedTokens.push(params.oldArray[i].id);
 			} else {
-				commonTokens.push({token: params.oldArray[i].token, id: params.oldArray[i].id});
+				commonTokens.push({ token: params.oldArray[i].token, id: params.oldArray[i].id });
 			}
 		}
 
-		return { newTokens, oldTokens, commonTokens };
+		return { newTokens, unusedTokens, commonTokens };
 	}
 }

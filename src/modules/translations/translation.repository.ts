@@ -5,15 +5,17 @@ import {
 	SearchResultInterface,
 	NotFoundError,
 } from "@structured-growth/microservice-sdk";
-import { Transaction } from 'sequelize/types';
-import Translation, {TranslationCreationAttributes} from "../../../database/models/translation";
+import { Transaction } from "sequelize/types";
+import Translation, {
+	TranslationCreationAttributes,
+	TranslationUpdateAttributes,
+} from "../../../database/models/translation";
 import { TranslationSearchParamsInterface } from "../../interfaces/translation-search-params.interface";
-import { TranslationUpdateBodyInterface } from "../../interfaces/translation-update-body.interface";
 
 @autoInjectable()
 export class TranslationRepository
-	implements RepositoryInterface<Translation, TranslationSearchParamsInterface, TranslationCreationAttributes> {
-
+	implements RepositoryInterface<Translation, TranslationSearchParamsInterface, TranslationCreationAttributes>
+{
 	public async search(params: TranslationSearchParamsInterface): Promise<SearchResultInterface<Translation>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -56,11 +58,15 @@ export class TranslationRepository
 		return Translation.findByPk(id, {
 			attributes: params?.attributes,
 			rejectOnEmpty: false,
-			transaction
+			transaction,
 		});
 	}
 
-	public async update(id: number, params: TranslationUpdateBodyInterface, transaction?: Transaction): Promise<Translation> {
+	public async update(
+		id: number,
+		params: TranslationUpdateAttributes,
+		transaction?: Transaction
+	): Promise<Translation> {
 		if (transaction) {
 			const translation = await this.read(id, {}, transaction);
 

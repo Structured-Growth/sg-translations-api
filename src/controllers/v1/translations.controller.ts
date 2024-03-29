@@ -10,13 +10,13 @@ import {
 	ValidateFuncArgs,
 } from "@structured-growth/microservice-sdk";
 import { TranslationAttributes } from "../../../database/models/translation";
-import { TranslationRepository} from "../../modules/translations/translation.repository";
-import { TranslationService} from "../../modules/translations/translation.service";
+import { TranslationRepository } from "../../modules/translations/translation.repository";
+import { TranslationService } from "../../modules/translations/translation.service";
 import { TranslationSearchParamsInterface } from "../../interfaces/translation-search-params.interface";
 import { pick } from "lodash";
 import { TranslationUpdateBodyInterface } from "../../interfaces/translation-update-body.interface";
-import { TranslationSearchParamsValidator} from "../../validators/translation-search-params.validator";
-import { TranslationReadParamsValidator} from "../../validators/translation-read-params.validator";
+import { TranslationSearchParamsValidator } from "../../validators/translation-search-params.validator";
+import { TranslationReadParamsValidator } from "../../validators/translation-read-params.validator";
 import { TranslationUpdateParamsValidator } from "../../validators/translation-update-params.validator";
 
 const publicTranslationAttributes = [
@@ -29,7 +29,7 @@ const publicTranslationAttributes = [
 	"tokenId",
 	"clientId",
 	"locale",
-	"text"
+	"text",
 ] as const;
 type TranslationKeys = (typeof publicTranslationAttributes)[number];
 type PublicTranslationAttributes = Pick<TranslationAttributes, TranslationKeys>;
@@ -38,7 +38,6 @@ type PublicTranslationAttributes = Pick<TranslationAttributes, TranslationKeys>;
 @Tags("TranslationsController")
 @autoInjectable()
 export class TranslationsController extends BaseController {
-
 	constructor(
 		@inject("TranslationRepository") private translationRepository: TranslationRepository,
 		@inject("TranslationService") private translationService: TranslationService
@@ -108,7 +107,7 @@ export class TranslationsController extends BaseController {
 		@Queries() query: {},
 		@Body() body: TranslationUpdateBodyInterface
 	): Promise<PublicTranslationAttributes> {
-		const translation = await this.translationService.update(translationId, body);
+		const translation = await this.translationRepository.update(translationId, body);
 
 		return {
 			...(pick(translation.toJSON(), publicTranslationAttributes) as PublicTranslationAttributes),

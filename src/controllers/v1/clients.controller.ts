@@ -12,27 +12,20 @@ import {
 import { pick } from "lodash";
 import { ClientAttributes } from "../../../database/models/client";
 import { ClientRepository } from "../../modules/clients/client.repository";
-import { ClientService} from "../../modules/clients/client.service";
-import { TokenService} from "../../modules/tokens/token.service";
+import { ClientService } from "../../modules/clients/client.service";
 import { ClientCreateBodyInterface } from "../../interfaces/client-create-body.interface";
 import { ClientSearchParamsInterface } from "../../interfaces/client-search-params.interface";
 import { ClientUpdateBodyInterface } from "../../interfaces/client-update-body.interface";
 import { ClientCreateTranslationBodyInterface } from "../../interfaces/client-create-translation-body.interface";
+import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/client-create-dynamic-translate-body.interface";
 import { ClientSearchParamsValidator } from "../../validators/client-search-params.validator";
 import { ClientCreateParamsValidator } from "../../validators/client-create-params.validator";
 import { ClientReadParamsValidator } from "../../validators/client-read-params.validator";
 import { ClientUpdateParamsValidator } from "../../validators/client-update-params.validator";
 import { ClientDeleteParamsValidator } from "../../validators/client-delete-params.validator";
-import { ClientCreateTranslationParamsValidator} from "../../validators/client-create-translation-params.validator";
-import {
-	ClientGetLocalizedTranslationParamsValidator
-} from "../../validators/client-get-localized-translation-params.validator";
-import {
-	ClientCreateDynamicTranslateBodyInterface
-} from "../../interfaces/client-create-dynamic-translate-body.interface";
-import {
-	ClientCreateDynamicTranslateParamsValidator
-} from "../../validators/client-create-dynamic-translate-params.validator";
+import { ClientCreateTranslationParamsValidator } from "../../validators/client-create-translation-params.validator";
+import { ClientGetLocalizedTranslationParamsValidator } from "../../validators/client-get-localized-translation-params.validator";
+import { ClientCreateDynamicTranslateParamsValidator } from "../../validators/client-create-dynamic-translate-params.validator";
 
 const publicClientAttributes = [
 	"id",
@@ -44,7 +37,7 @@ const publicClientAttributes = [
 	"arn",
 	"title",
 	"clientName",
-	"locales"
+	"locales",
 ] as const;
 type ClientKeys = (typeof publicClientAttributes)[number];
 type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;
@@ -55,8 +48,7 @@ type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;
 export class ClientsController extends BaseController {
 	constructor(
 		@inject("ClientRepository") private clientRepository: ClientRepository,
-		@inject("ClientService") private clientService: ClientService,
-		@inject("TokenService") private tokenService: TokenService
+		@inject("ClientService") private clientService: ClientService
 	) {
 		super();
 	}
@@ -71,9 +63,7 @@ export class ClientsController extends BaseController {
 	@DescribeResource("Organization", ({ query }) => String(query.orgId))
 	@DescribeResource("Client", ({ query }) => Number(query.id))
 	@ValidateFuncArgs(ClientSearchParamsValidator)
-	async search(
-		@Queries() query: ClientSearchParamsInterface
-	): Promise<SearchResultInterface<PublicClientAttributes>> {
+	async search(@Queries() query: ClientSearchParamsInterface): Promise<SearchResultInterface<PublicClientAttributes>> {
 		const { data, ...result } = await this.clientRepository.search(query);
 
 		return {
@@ -94,10 +84,7 @@ export class ClientsController extends BaseController {
 	@DescribeAction("clients/create")
 	@DescribeResource("Organization", ({ body }) => String(body.orgId))
 	@ValidateFuncArgs(ClientCreateParamsValidator)
-	async create(
-		@Queries() query: {},
-		@Body() body: ClientCreateBodyInterface
-	): Promise<PublicClientAttributes> {
+	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
 		const client = await this.clientService.create(body);
 		this.response.status(201);
 
@@ -143,7 +130,7 @@ export class ClientsController extends BaseController {
 		@Queries() query: {},
 		@Body() body: ClientUpdateBodyInterface
 	): Promise<PublicClientAttributes> {
-		const client = await this.clientService.update(clientId, body);
+		const client = await this.clientRepository.update(clientId, body);
 
 		return {
 			...(pick(client.toJSON(), publicClientAttributes) as PublicClientAttributes),
@@ -168,23 +155,20 @@ export class ClientsController extends BaseController {
 	/**
 	 * Getting localized translations
 	 */
-	@OperationId("Read")
+	@OperationId("Get translation JSON")
 	@Get("/:clientId/:locale")
 	@SuccessResponse(200, "Returns localized translations")
 	@DescribeAction("clients/localized-translations")
 	@DescribeResource("Client", ({ params }) => `${params.clientId}/${params.locale}`)
 	@ValidateFuncArgs(ClientGetLocalizedTranslationParamsValidator)
-	async getLocalizedMessages(
-		@Path() clientId: number,
-		@Path() locale: string,
-	): Promise<object> {
+	async getLocalizedMessages(@Path() clientId: number, @Path() locale: string): Promise<object> {
 		return await this.clientService.getLocalizedTranslation(clientId, locale);
 	}
 
 	/**
 	 * Creating a translation with dynamic locales.
 	 */
-	@OperationId("Create")
+	@OperationId("Create dynamic translations")
 	@Post("/:clientId/translate")
 	@SuccessResponse(201, "Returns successful translations.")
 	@DescribeAction("clients/translation/dynamic")
@@ -201,7 +185,7 @@ export class ClientsController extends BaseController {
 	/**
 	 * Translation creation for the client.
 	 */
-	@OperationId("Create tokens from JSON")
+	@OperationId("Create tokens and translations from JSON")
 	@Post("/:clientId/upload")
 	@SuccessResponse(201, "Returns successful translations.")
 	@DescribeAction("clients/translation/upload")

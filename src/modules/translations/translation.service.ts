@@ -1,7 +1,7 @@
 import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
 import { Op } from "sequelize";
-import { Transaction } from 'sequelize/types';
-import Translation, {  TranslationAttributes } from "../../../database/models/translation";
+import { Transaction } from "sequelize/types";
+import Translation, { TranslationAttributes } from "../../../database/models/translation";
 import { TranslationUpdateBodyInterface } from "../../interfaces/translation-update-body.interface";
 import { TranslationSearchParamsInterface } from "../../interfaces/translation-search-params.interface";
 import { TranslationCheckParamsInterface } from "../../interfaces/translation-check-changes-params.interface";
@@ -10,33 +10,12 @@ import { TranslationCreateBodyInterface } from "../../interfaces/translation-cre
 
 @autoInjectable()
 export class TranslationService {
-	constructor(
-		@inject("TranslationRepository") private translationRepository: TranslationRepository,
-	) {}
+	constructor(@inject("TranslationRepository") private translationRepository: TranslationRepository) {}
 
 	public async createMultiple(params: TranslationCreateBodyInterface[]): Promise<Translation[]> {
 		return Translation.sequelize.transaction(async (transaction) => {
 			return await Translation.bulkCreate(params, { transaction });
 		});
-	}
-
-	public async update(id: number, params: TranslationUpdateBodyInterface): Promise<Translation> {
-		const count = await Translation.count({
-			where: { id },
-		});
-
-		if (count === 0) {
-			throw new ValidationError({
-				title: "There are no translations with this ID",
-			});
-		}
-
-		return this.translationRepository.update(
-			id,
-			{
-				text: params.text,
-			},
-		);
 	}
 
 	public async allTranslations(params: TranslationSearchParamsInterface): Promise<TranslationAttributes[]> {
@@ -61,7 +40,7 @@ export class TranslationService {
 			});
 
 			if (translations.length > 0) {
-				return translations.map(translation => translation.dataValues);
+				return translations.map((translation) => translation.dataValues);
 			} else {
 				return [];
 			}
@@ -76,31 +55,30 @@ export class TranslationService {
 		}
 	}
 
-	public async checkTranslationChanges( params: TranslationCheckParamsInterface): Promise<void> {
-		const {
-			orgId,
-			clientId,
-			locales,
-			commonTokens,
-			jsonTokens
-		} = params;
-		const translationsForChange: {id: number, text: string}[] = [];
+	public async checkTranslationChanges(params: TranslationCheckParamsInterface): Promise<void> {
+		const { orgId, clientId, locales, commonTokens, jsonTokens } = params;
+		const translationsForChange: { id: number; text: string }[] = [];
 
-		const defaultItems = commonTokens.map(commonToken => {
-			const textObj = jsonTokens.find(jsonToken => jsonToken[commonToken.token]);
-			const text = textObj ? textObj[commonToken.token] : '';
+		const defaultItems = commonTokens.map((commonToken) => {
+			const textObj = jsonTokens.find((jsonToken) => jsonToken[commonToken.token]);
+			const text = textObj ? textObj[commonToken.token] : "";
 			return {
 				token: commonToken.token,
 				id: commonToken.id,
-				textEn: text
+				textEn: text,
 			};
 		});
 
-		const tokensId: number[] = commonTokens.map(token => token.id);
-		const translationsForCheck: TranslationAttributes[] = await this.allTranslations({orgId, clientId, locales, tokensId});
+		const tokensId: number[] = commonTokens.map((token) => token.id);
+		const translationsForCheck: TranslationAttributes[] = await this.allTranslations({
+			orgId,
+			clientId,
+			locales,
+			tokensId,
+		});
 
-		translationsForCheck.map(translation => {
-			const newToken = defaultItems.find(token => token.id === translation.tokenId);
+		translationsForCheck.map((translation) => {
+			const newToken = defaultItems.find((token) => token.id === translation.tokenId);
 			if (newToken.textEn !== translation.text && translation.locale === "en-US") {
 				const tokenChangeId = newToken.id;
 				translationsForChange.push({ id: translation.id, text: newToken.textEn });
@@ -111,7 +89,7 @@ export class TranslationService {
 					}
 				}
 			}
-		})
+		});
 
 		if (translationsForChange) {
 			return Translation.sequelize.transaction(async (transaction) => {
@@ -124,7 +102,7 @@ export class TranslationService {
 						transaction
 					);
 				}
-			})
+			});
 		}
 	}
 }

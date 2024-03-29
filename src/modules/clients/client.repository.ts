@@ -5,14 +5,13 @@ import {
 	SearchResultInterface,
 	NotFoundError,
 } from "@structured-growth/microservice-sdk";
-import Client, {ClientCreationAttributes} from "../../../database/models/client";
+import Client, { ClientCreationAttributes, ClientUpdateAttributes } from "../../../database/models/client";
 import { ClientSearchParamsInterface } from "../../interfaces/client-search-params.interface";
-import { ClientUpdateBodyInterface } from "../../interfaces/client-update-body.interface";
 
 @autoInjectable()
 export class ClientRepository
-	implements RepositoryInterface<Client, ClientSearchParamsInterface, ClientCreationAttributes> {
-
+	implements RepositoryInterface<Client, ClientSearchParamsInterface, ClientCreationAttributes>
+{
 	public async search(params: ClientSearchParamsInterface): Promise<SearchResultInterface<Client>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -23,8 +22,13 @@ export class ClientRepository
 		params.orgId && (where["orgId"] = params.orgId);
 		params.status && (where["status"] = { [Op.in]: params.status });
 		params.id && (where["id"] = { [Op.in]: params.id });
-		params.clientName && (where["clientName"] = { [Op.in]: params.clientName });
 		params.locales && (where["locales"] = { [Op.contains]: params.locales });
+
+		if (params.clientName?.length > 0) {
+			where["clientName"] = {
+				[Op.or]: params.clientName.map((str) => ({ [Op.iLike]: str.replace(/\*/g, "%") })),
+			};
+		}
 
 		const { rows, count } = await Client.findAndCountAll({
 			where,
@@ -57,7 +61,7 @@ export class ClientRepository
 		});
 	}
 
-	public async update(id: number, params: ClientUpdateBodyInterface): Promise<Client> {
+	public async update(id: number, params: ClientUpdateAttributes): Promise<Client> {
 		const client = await this.read(id);
 
 		if (!client) {

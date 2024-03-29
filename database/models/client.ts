@@ -1,5 +1,10 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
-import { container, RegionEnum, DefaultModelInterface, BelongsToAccountInterface } from "@structured-growth/microservice-sdk";
+import {
+	container,
+	RegionEnum,
+	DefaultModelInterface,
+	BelongsToAccountInterface,
+} from "@structured-growth/microservice-sdk";
 
 export interface ClientAttributes extends Omit<DefaultModelInterface, keyof BelongsToAccountInterface> {
 	status: "active" | "inactive" | "archived";
@@ -9,8 +14,10 @@ export interface ClientAttributes extends Omit<DefaultModelInterface, keyof Belo
 }
 
 export interface ClientCreationAttributes
-	extends Omit<ClientAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {
-}
+	extends Omit<ClientAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {}
+
+export interface ClientUpdateAttributes
+	extends Partial<Pick<ClientAttributes, "status" | "title" | "clientName" | "locales">> {}
 
 @Table({
 	tableName: "clients",
@@ -18,7 +25,6 @@ export interface ClientCreationAttributes
 	underscored: true,
 })
 export class Client extends Model<ClientAttributes, ClientCreationAttributes> implements ClientAttributes {
-
 	@Column
 	orgId: number;
 

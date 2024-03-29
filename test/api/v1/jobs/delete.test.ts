@@ -4,7 +4,6 @@ import { initTest } from "../../../common/init-test";
 import { Job } from "../../../../database/models/job";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
 
-
 describe("DELETE /api/v1/jobs/:jobId", () => {
 	const { server, context } = initTest();
 	let createdJobId: number;
@@ -15,11 +14,11 @@ describe("DELETE /api/v1/jobs/:jobId", () => {
 			region: RegionEnum.US,
 			clientId: 2,
 			translator: "Test Translator",
-			status: "inProgress",
+			status: "in_progress",
 			locales: ["en-US", "fr-FR"],
 			numberTokens: 100,
 			numberTranslations: 0,
-			launchType: "admin"
+			launchType: "admin",
 		});
 
 		createdJobId = createdJob.id;

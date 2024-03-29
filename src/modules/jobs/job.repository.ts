@@ -5,14 +5,11 @@ import {
 	SearchResultInterface,
 	NotFoundError,
 } from "@structured-growth/microservice-sdk";
-import Job, {JobCreationAttributes} from "../../../database/models/job";
+import Job, { JobCreationAttributes, JobUpdateAttributes } from "../../../database/models/job";
 import { JobSearchParamsInterface } from "../../interfaces/job-search-params.interface";
-import { JobUpdateBodyInterface } from "../../interfaces/job-update-body.interface";
 
 @autoInjectable()
-export class JobRepository
-	implements RepositoryInterface<Job, JobSearchParamsInterface, JobCreationAttributes> {
-
+export class JobRepository implements RepositoryInterface<Job, JobSearchParamsInterface, JobCreationAttributes> {
 	public async search(params: JobSearchParamsInterface): Promise<SearchResultInterface<Job>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -59,7 +56,7 @@ export class JobRepository
 		});
 	}
 
-	public async update(id: number, params: JobUpdateBodyInterface): Promise<Job> {
+	public async update(id: number, params: JobUpdateAttributes): Promise<Job> {
 		const job = await this.read(id);
 
 		if (!job) {

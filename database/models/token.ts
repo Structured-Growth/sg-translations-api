@@ -13,8 +13,7 @@ export interface TokenAttributes extends Omit<DefaultModelInterface, keyof Belon
 }
 
 export interface TokenCreationAttributes
-	extends Omit<TokenAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {
-}
+	extends Omit<TokenAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {}
 
 @Table({
 	tableName: "tokens",
@@ -22,7 +21,6 @@ export interface TokenCreationAttributes
 	underscored: true,
 })
 export class Token extends Model<TokenAttributes, TokenCreationAttributes> implements TokenAttributes {
-
 	@Column
 	orgId: number;
 
@@ -40,11 +38,23 @@ export class Token extends Model<TokenAttributes, TokenCreationAttributes> imple
 	client: Client;
 
 	static get arnPattern(): string {
-		return [container.resolve("appPrefix"), "<region>", "<orgId>", "<accountId>", "clients/<clientId>/tokens/<tokenId>"].join(":");
+		return [
+			container.resolve("appPrefix"),
+			"<region>",
+			"<orgId>",
+			"<accountId>",
+			"clients/<clientId>/tokens/<tokenId>",
+		].join(":");
 	}
 
 	get arn(): string {
-		return [container.resolve("appPrefix"), this.region, this.orgId, `-`, `clients/${this.clientId}/tokens/${this.id}`].join(":");
+		return [
+			container.resolve("appPrefix"),
+			this.region,
+			this.orgId,
+			`-`,
+			`clients/${this.clientId}/tokens/${this.id}`,
+		].join(":");
 	}
 }
 
