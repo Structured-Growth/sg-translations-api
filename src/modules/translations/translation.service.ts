@@ -55,36 +55,32 @@ export class TranslationService {
 		}
 	}
 
-	public async checkTranslationChanges(params: TranslationCheckParamsInterface): Promise<void> {
+	public async actualizeTranslation(params: TranslationCheckParamsInterface): Promise<void> {
 		const { orgId, clientId, locales, commonTokens, jsonTokens } = params;
 		const translationsForChange: { id: number; text: string }[] = [];
 
 		const defaultItems = commonTokens.map((commonToken) => {
-			const textObj = jsonTokens.find((jsonToken) => jsonToken[commonToken.token]);
-			const text = textObj ? textObj[commonToken.token] : "";
 			return {
 				token: commonToken.token,
 				id: commonToken.id,
-				textEn: text,
+				textEn: jsonTokens[commonToken.token],
 			};
 		});
 
-		const tokensId: number[] = commonTokens.map((token) => token.id);
-		const translationsForCheck: TranslationAttributes[] = await this.allTranslations({
+		const translationsForCheck = await this.allTranslations({
 			orgId,
 			clientId,
 			locales,
-			tokensId,
+			tokensId: defaultItems.map((token) => token.id),
 		});
 
 		translationsForCheck.map((translation) => {
 			const newToken = defaultItems.find((token) => token.id === translation.tokenId);
 			if (newToken.textEn !== translation.text && translation.locale === "en-US") {
-				const tokenChangeId = newToken.id;
 				translationsForChange.push({ id: translation.id, text: newToken.textEn });
 
 				for (const item of translationsForCheck) {
-					if (item.tokenId === tokenChangeId && item.locale !== "en-US") {
+					if (item.tokenId === newToken.id && item.locale !== "en-US") {
 						translationsForChange.push({ id: item.id, text: "" });
 					}
 				}

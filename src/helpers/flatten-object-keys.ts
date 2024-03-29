@@ -1,14 +1,14 @@
-export default function flattenObjectKeys (obj: object, prefix: string = ''): { [key: string]: string }[] {
-	const jsonTokens: { [key: string]: string }[] = [];
+export default function flattenObjectKeys(obj: object, prefix: string = ""): { [key: string]: string } {
+	const flattenedObject: { [key: string]: string } = {};
 
 	for (const [key, value] of Object.entries(obj)) {
-		if (typeof value === 'object') {
-			const nestedTokens = flattenObjectKeys(value, prefix ? `${prefix}.${key}` : key);
-			jsonTokens.push(...nestedTokens);
+		if (typeof value === "object") {
+			const nestedKeys = flattenObjectKeys(value, prefix ? `${prefix}.${key}` : key);
+			Object.assign(flattenedObject, nestedKeys);
 		} else {
-			jsonTokens.push({ [prefix ? `${prefix}.${key}` : key]: value });
+			flattenedObject[prefix ? `${prefix}.${key}` : key] = value;
 		}
 	}
 
-	return jsonTokens;
+	return flattenedObject;
 }

@@ -158,7 +158,7 @@ export class ClientService {
 		const clientLocales = client.locales;
 
 		const jsonTokens = flattenObjectKeys(data);
-		const jsonTokensNames = jsonTokens.map((obj) => Object.keys(obj)[0]);
+		const jsonTokensNames = Object.keys(jsonTokens);
 
 		const tableTokens: TokenAttributes[] = await this.tokenService.allTokens({
 			orgId,
@@ -184,41 +184,25 @@ export class ClientService {
 
 			const createdTokens = await this.tokenService.createMultiple(tokensToCreate);
 
-			let translationsToCreate: TranslationCreateBodyInterface[] = createdTokens.map((token) => {
-				const foundToken = jsonTokens.find((obj) => Object.keys(obj)[0] === token.token);
-				const text = foundToken ? Object.values(foundToken)[0] : "";
-				return {
-					orgId,
-					region,
-					clientId,
-					tokenId: token.id,
-					locale,
-					text,
-				};
-			});
+			const translationsToCreate: TranslationCreateBodyInterface[] = [];
 
-			if (clientLocales.length > 1) {
-				for (const lang of clientLocales) {
-					if (lang === "en-US") continue;
-					const translationsToAdd: TranslationCreateBodyInterface[] = createdTokens.map((token) => {
-						return {
-							orgId,
-							region,
-							clientId,
-							tokenId: token.id,
-							locale: lang,
-							text: "",
-						};
+			clientLocales.forEach((locale) => {
+				createdTokens.forEach((token) => {
+					translationsToCreate.push({
+						orgId,
+						region,
+						clientId,
+						tokenId: token.id,
+						locale,
+						text: locale === "en-US" ? jsonTokens[token.token] : "",
 					});
-
-					translationsToCreate = translationsToCreate.concat(translationsToAdd);
-				}
-			}
+				});
+			});
 
 			await this.translationService.createMultiple(translationsToCreate);
 		}
 
-		await this.translationService.checkTranslationChanges({
+		await this.translationService.actualizeTranslation({
 			orgId,
 			clientId,
 			locales: clientLocales,
