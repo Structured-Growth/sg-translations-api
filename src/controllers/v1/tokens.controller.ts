@@ -10,33 +10,21 @@ import {
 	ValidateFuncArgs,
 } from "@structured-growth/microservice-sdk";
 import { TokenRepository } from "../../modules/tokens/token.repository";
-import { TokenSearchParamsInterface} from "../../interfaces/token-search-params.interface";
+import { TokenSearchParamsInterface } from "../../interfaces/token-search-params.interface";
 import { pick } from "lodash";
 import { TokenAttributes } from "../../../database/models/token";
 import { TokenSearchParamsValidator } from "../../validators/token-search-params.validator";
 import { TokenReadParamsValidator } from "../../validators/token-read-params.validator";
 
-const publicTokenAttributes = [
-	"id",
-	"orgId",
-	"region",
-	"createdAt",
-	"updatedAt",
-	"arn",
-	"clientId",
-	"token"
-] as const;
+const publicTokenAttributes = ["id", "orgId", "region", "createdAt", "updatedAt", "arn", "clientId", "token"] as const;
 type TokenKeys = (typeof publicTokenAttributes)[number];
 type PublicTokenAttributes = Pick<TokenAttributes, TokenKeys>;
 
 @Route("v1/tokens")
-@Tags("TokensController")
+@Tags("Tokens")
 @autoInjectable()
 export class TokensController extends BaseController {
-
-	constructor(
-		@inject("TokenRepository") private tokenRepository: TokenRepository,
-	) {
+	constructor(@inject("TokenRepository") private tokenRepository: TokenRepository) {
 		super();
 	}
 
@@ -47,13 +35,9 @@ export class TokensController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of tokens")
 	@DescribeAction("tokens/search")
-	@DescribeResource("Organization", ({ query }) => String(query.orgId))
-	@DescribeResource("ClientId", ({ query }) => Number(query.clientId))
 	@DescribeResource("Token", ({ query }) => String(query.id))
 	@ValidateFuncArgs(TokenSearchParamsValidator)
-	async search(
-		@Queries() query: TokenSearchParamsInterface
-	): Promise<SearchResultInterface<PublicTokenAttributes>> {
+	async search(@Queries() query: TokenSearchParamsInterface): Promise<SearchResultInterface<PublicTokenAttributes>> {
 		const { data, ...result } = await this.tokenRepository.search(query);
 
 		return {

@@ -43,7 +43,7 @@ type ClientKeys = (typeof publicClientAttributes)[number];
 type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;
 
 @Route("v1/clients")
-@Tags("ClientsController")
+@Tags("Clients")
 @autoInjectable()
 export class ClientsController extends BaseController {
 	constructor(
@@ -60,7 +60,6 @@ export class ClientsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of clients")
 	@DescribeAction("clients/search")
-	@DescribeResource("Organization", ({ query }) => String(query.orgId))
 	@DescribeResource("Client", ({ query }) => Number(query.id))
 	@ValidateFuncArgs(ClientSearchParamsValidator)
 	async search(@Queries() query: ClientSearchParamsInterface): Promise<SearchResultInterface<PublicClientAttributes>> {
@@ -82,7 +81,6 @@ export class ClientsController extends BaseController {
 	@Post("/")
 	@SuccessResponse(201, "Returns created сlient")
 	@DescribeAction("clients/create")
-	@DescribeResource("Organization", ({ body }) => String(body.orgId))
 	@ValidateFuncArgs(ClientCreateParamsValidator)
 	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
 		const client = await this.clientService.create(body);
@@ -161,7 +159,7 @@ export class ClientsController extends BaseController {
 	@DescribeAction("clients/localized-translations")
 	@DescribeResource("Client", ({ params }) => `${params.clientId}/${params.locale}`)
 	@ValidateFuncArgs(ClientGetLocalizedTranslationParamsValidator)
-	async getLocalizedMessages(@Path() clientId: number, @Path() locale: string): Promise<object> {
+	async getLocalizedMessages(@Path() clientId: number, @Path() locale: string): Promise<{ [key: string]: any }> {
 		return await this.clientService.getLocalizedTranslation(clientId, locale);
 	}
 

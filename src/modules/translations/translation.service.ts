@@ -2,7 +2,6 @@ import { autoInjectable, inject, NotFoundError, ValidationError } from "@structu
 import { Op } from "sequelize";
 import { Transaction } from "sequelize/types";
 import Translation, { TranslationAttributes } from "../../../database/models/translation";
-import { TranslationUpdateBodyInterface } from "../../interfaces/translation-update-body.interface";
 import { TranslationSearchParamsInterface } from "../../interfaces/translation-search-params.interface";
 import { TranslationCheckParamsInterface } from "../../interfaces/translation-check-changes-params.interface";
 import { TranslationRepository } from "./translation.repository";
@@ -12,14 +11,26 @@ import { TranslationCreateBodyInterface } from "../../interfaces/translation-cre
 export class TranslationService {
 	constructor(@inject("TranslationRepository") private translationRepository: TranslationRepository) {}
 
-	public async createMultiple(params: TranslationCreateBodyInterface[]): Promise<Translation[]> {
-		return Translation.sequelize.transaction(async (transaction) => {
+	public async createMultiple(
+		params: TranslationCreateBodyInterface[],
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<Translation[]> {
+		const action = async (transaction?: Transaction) => {
 			return await Translation.bulkCreate(params, { transaction });
-		});
+		};
+
+		return options?.transaction ? action(options.transaction) : Translation.sequelize.transaction(action);
 	}
 
-	public async allTranslations(params: TranslationSearchParamsInterface): Promise<TranslationAttributes[]> {
-		return Translation.sequelize.transaction(async (transaction) => {
+	public async getTranslations(
+		params: TranslationSearchParamsInterface,
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<TranslationAttributes[]> {
+		const action = async (transaction?: Transaction) => {
 			const where = {};
 
 			params.orgId && (where["orgId"] = params.orgId);
@@ -40,11 +51,13 @@ export class TranslationService {
 			});
 
 			if (translations.length > 0) {
-				return translations.map((translation) => translation.dataValues);
+				return translations;
 			} else {
 				return [];
 			}
-		});
+		};
+
+		return options?.transaction ? action(options.transaction) : Translation.sequelize.transaction(action);
 	}
 
 	public async deleteMultipleWithTokens(tokens: number[], transaction: Transaction): Promise<void> {
@@ -55,7 +68,12 @@ export class TranslationService {
 		}
 	}
 
-	public async actualizeTranslation(params: TranslationCheckParamsInterface): Promise<void> {
+	public async actualizeTranslation(
+		params: TranslationCheckParamsInterface,
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<void> {
 		const { orgId, clientId, locales, commonTokens, jsonTokens } = params;
 		const translationsForChange: { id: number; text: string }[] = [];
 
@@ -67,12 +85,15 @@ export class TranslationService {
 			};
 		});
 
-		const translationsForCheck = await this.allTranslations({
-			orgId,
-			clientId,
-			locales,
-			tokensId: defaultItems.map((token) => token.id),
-		});
+		const translationsForCheck = await this.getTranslations(
+			{
+				orgId,
+				clientId,
+				locales,
+				tokensId: defaultItems.map((token) => token.id),
+			},
+			{ transaction: options?.transaction }
+		);
 
 		translationsForCheck.map((translation) => {
 			const newToken = defaultItems.find((token) => token.id === translation.tokenId);
@@ -88,17 +109,15 @@ export class TranslationService {
 		});
 
 		if (translationsForChange) {
-			return Translation.sequelize.transaction(async (transaction) => {
-				for (const translation of translationsForChange) {
-					await this.translationRepository.update(
-						translation.id,
-						{
-							text: translation.text,
-						},
-						transaction
-					);
-				}
-			});
+			for (const translation of translationsForChange) {
+				await this.translationRepository.update(
+					translation.id,
+					{
+						text: translation.text,
+					},
+					options?.transaction
+				);
+			}
 		}
 	}
 }

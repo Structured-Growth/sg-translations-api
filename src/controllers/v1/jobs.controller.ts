@@ -13,9 +13,9 @@ import { JobAttributes } from "../../../database/models/job";
 import { JobRepository } from "../../modules/jobs/job.repository";
 import { JobSearchParamsInterface } from "../../interfaces/job-search-params.interface";
 import { pick } from "lodash";
-import { JobSearchParamsValidator} from "../../validators/job-search-params.validator";
-import { JobReadParamsValidator} from "../../validators/job-read-params.validator";
-import { JobDeleteParamsValidator} from "../../validators/job-delete-params.validator";
+import { JobSearchParamsValidator } from "../../validators/job-search-params.validator";
+import { JobReadParamsValidator } from "../../validators/job-read-params.validator";
+import { JobDeleteParamsValidator } from "../../validators/job-delete-params.validator";
 
 const publicJobAttributes = [
 	"id",
@@ -30,19 +30,16 @@ const publicJobAttributes = [
 	"locales",
 	"numberTokens",
 	"numberTranslations",
-	"launchType"
+	"launchType",
 ] as const;
 type JobKeys = (typeof publicJobAttributes)[number];
 type PublicJobAttributes = Pick<JobAttributes, JobKeys>;
 
 @Route("v1/jobs")
-@Tags("JobsController")
+@Tags("Jobs")
 @autoInjectable()
 export class JobsController extends BaseController {
-
-	constructor(
-		@inject("JobRepository") private jobRepository: JobRepository,
-	) {
+	constructor(@inject("JobRepository") private jobRepository: JobRepository) {
 		super();
 	}
 
@@ -53,13 +50,9 @@ export class JobsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of jobs")
 	@DescribeAction("jobs/search")
-	@DescribeResource("Organization", ({ query }) => String(query.orgId))
-	@DescribeResource("Client", ({ query }) => Number(query.clientId))
 	@DescribeResource("Job", ({ query }) => Number(query.id))
 	@ValidateFuncArgs(JobSearchParamsValidator)
-	async search(
-		@Queries() query: JobSearchParamsInterface
-	): Promise<SearchResultInterface<PublicJobAttributes>> {
+	async search(@Queries() query: JobSearchParamsInterface): Promise<SearchResultInterface<PublicJobAttributes>> {
 		const { data, ...result } = await this.jobRepository.search(query);
 
 		return {

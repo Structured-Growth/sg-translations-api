@@ -1,4 +1,5 @@
 import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
+import { Transaction } from "sequelize/types";
 import Token, { TokenAttributes } from "../../../database/models/token";
 import { TokenRepository } from "./token.repository";
 import { TranslationService } from "../translations/translation.service";
@@ -36,15 +37,26 @@ export class TokenService {
 		});
 	}
 
-	public async createMultiple(params: TokenCreateBodyInterface[]): Promise<TokenAttributes[]> {
-		return Token.sequelize.transaction(async (transaction) => {
+	public async createMultiple(
+		params: TokenCreateBodyInterface[],
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<TokenAttributes[]> {
+		const action = async (transaction?: Transaction) => {
 			return await Token.bulkCreate(params, { transaction });
-			// return tokens.map((token) => token.dataValues);
-		});
+		};
+
+		return options?.transaction ? action(options.transaction) : Token.sequelize.transaction(action);
 	}
 
-	public async deleteMultiple(tokens: number[]): Promise<void> {
-		return Token.sequelize.transaction(async (transaction) => {
+	public async deleteMultiple(
+		tokens: number[],
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<void> {
+		const action = async (transaction?: Transaction) => {
 			await this.translationService.deleteMultipleWithTokens(tokens, transaction);
 
 			const n = await Token.destroy({ where: { id: tokens }, transaction });
@@ -52,11 +64,18 @@ export class TokenService {
 			if (n === 0) {
 				throw new NotFoundError(`None of the clients with tokens ids were found`);
 			}
-		});
+		};
+
+		return options?.transaction ? action(options.transaction) : Token.sequelize.transaction(action);
 	}
 
-	public async allTokens(params: TokenSearchParamsInterface): Promise<TokenAttributes[]> {
-		return Token.sequelize.transaction(async (transaction) => {
+	public async getTokens(
+		params: TokenSearchParamsInterface,
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<TokenAttributes[]> {
+		const action = async (transaction?: Transaction) => {
 			const where = {};
 
 			params.orgId && (where["orgId"] = params.orgId);
@@ -68,11 +87,13 @@ export class TokenService {
 			});
 
 			if (tokens.length > 0) {
-				return tokens.map((token) => token.dataValues);
+				return tokens;
 			} else {
 				return [];
 			}
-		});
+		};
+
+		return options?.transaction ? action(options.transaction) : Token.sequelize.transaction(action);
 	}
 
 	public findDifference(params: TokenFindDifferenceParamsInterface): {

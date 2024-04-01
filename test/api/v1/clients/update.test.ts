@@ -1,7 +1,7 @@
 import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
-import { createClient} from "../../../common/create-client";
+import { createClient } from "../../../common/create-client";
 
 describe("PUT /api/v1/clients/:clientId", () => {
 	const { server, context } = initTest();
@@ -40,8 +40,8 @@ describe("PUT /api/v1/clients/:clientId", () => {
 	});
 
 	it("Should return validation error if id is wrong", async () => {
-		const { statusCode, body } = await server.put(`/v1/clients/9999`);
-		assert.equal(statusCode, 422);
+		const { statusCode, body } = await server.put(`/v1/clients/9999`).send({});
+		assert.equal(statusCode, 404);
 		assert.isString(body.message);
 	});
 });

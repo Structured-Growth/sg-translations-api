@@ -3,19 +3,32 @@ import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { Translation } from "../../../../database/models/translation";
 import { Token } from "../../../../database/models/token";
+import { Client } from "../../../../database/models/client";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
 
 describe("GET /api/v1/translations", () => {
 	const { server, context } = initTest();
 	let createdTranslationId: number;
 	let createdTokenId: number;
+	let createdClientId: number;
 
 	before(async () => {
+		const createdClient = await Client.create({
+			orgId: 2,
+			region: RegionEnum.US,
+			status: "active",
+			title: `TestClientName-${Date.now()}`,
+			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
+			locales: ["us-En", "pt-Pt"],
+		});
+
+		createdClientId = createdClient.id;
+
 		const createdToken = await Token.create({
 			orgId: 2,
 			region: RegionEnum.US,
-			clientId: 2,
-			token: "test.test"
+			clientId: createdClientId,
+			token: "test.test",
 		});
 
 		createdTokenId = createdToken.id;
@@ -24,9 +37,9 @@ describe("GET /api/v1/translations", () => {
 			orgId: 2,
 			region: RegionEnum.US,
 			tokenId: createdTokenId,
-			clientId: 2,
+			clientId: createdClientId,
 			locale: "en-US",
-			text: "Testing text"
+			text: "Testing text",
 		});
 
 		createdTranslationId = createdTranslation.id;
@@ -35,6 +48,7 @@ describe("GET /api/v1/translations", () => {
 	after(async () => {
 		await Translation.destroy({ where: { id: createdTranslationId } });
 		await Token.destroy({ where: { id: createdTokenId } });
+		await Client.destroy({ where: { id: createdClientId } });
 	});
 
 	it("Should return 0 translations", async () => {
@@ -46,7 +60,7 @@ describe("GET /api/v1/translations", () => {
 
 	it("Should return translation", async () => {
 		const { statusCode, body } = await server.get("/v1/translations").query({
-			"id[0]": createdTranslationId
+			"id[0]": createdTranslationId,
 		});
 		assert.equal(statusCode, 200);
 		assert.equal(body.data[0].id, createdTranslationId);
@@ -66,7 +80,7 @@ describe("GET /api/v1/translations", () => {
 
 	it("Should return validation error", async () => {
 		const { statusCode, body } = await server.get("/v1/translations").query({
-			id: -1
+			id: -1,
 		});
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");

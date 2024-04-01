@@ -67,27 +67,14 @@ export class TranslationRepository
 		params: TranslationUpdateAttributes,
 		transaction?: Transaction
 	): Promise<Translation> {
-		if (transaction) {
-			const translation = await this.read(id, {}, transaction);
-
-			if (!translation) {
-				throw new NotFoundError(`Translation ${id} not found`);
-			}
-
-			translation.setAttributes(params);
-
-			return translation.save({ transaction });
-		} else {
-			const translation = await this.read(id);
-
-			if (!translation) {
-				throw new NotFoundError(`Translation ${id} not found`);
-			}
-
-			translation.setAttributes(params);
-
-			return translation.save();
+		const translation = await this.read(id, {}, transaction);
+		if (!translation) {
+			throw new NotFoundError(`Translation ${id} not found`);
 		}
+
+		translation.setAttributes(params);
+
+		return translation.save({ transaction });
 	}
 
 	public async delete(id: number): Promise<void> {

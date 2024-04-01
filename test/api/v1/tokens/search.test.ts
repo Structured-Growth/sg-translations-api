@@ -2,18 +2,31 @@ import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { Token } from "../../../../database/models/token";
+import { Client } from "../../../../database/models/client";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
 
 describe("GET /api/v1/tokens", () => {
 	const { server, context } = initTest();
 	let createdTokenId: number;
+	let createdClientId: number;
 
 	before(async () => {
+		const createdClient = await Client.create({
+			orgId: 2,
+			region: RegionEnum.US,
+			status: "active",
+			title: `TestClientName-${Date.now()}`,
+			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
+			locales: ["us-En", "pt-Pt"],
+		});
+
+		createdClientId = createdClient.id;
+
 		const createdToken = await Token.create({
 			orgId: 2,
 			region: RegionEnum.US,
-			clientId: 2,
-			token: "test.test"
+			clientId: createdClientId,
+			token: "test.test",
 		});
 
 		createdTokenId = createdToken.id;
@@ -21,6 +34,7 @@ describe("GET /api/v1/tokens", () => {
 
 	after(async () => {
 		await Token.destroy({ where: { id: createdTokenId } });
+		await Client.destroy({ where: { id: createdClientId } });
 	});
 
 	it("Should return 0 tokens", async () => {
@@ -50,7 +64,7 @@ describe("GET /api/v1/tokens", () => {
 
 	it("Should return validation error", async () => {
 		const { statusCode, body } = await server.get("/v1/tokens").query({
-			"id[0]": -1
+			"id[0]": -1,
 		});
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");

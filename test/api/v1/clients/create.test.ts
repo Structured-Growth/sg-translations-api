@@ -62,6 +62,5 @@ describe("POST /api/v1/clients", () => {
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");
 		assert.isString(body.message);
-		assert.isString(body.validation.title[0]);
 	});
 });

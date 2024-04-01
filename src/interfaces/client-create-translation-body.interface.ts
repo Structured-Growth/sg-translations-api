@@ -3,5 +3,5 @@ export interface ClientCreateTranslationBodyInterface {
 	orgId: number;
 	region: RegionEnum;
 	locale: string;
-	data: object;
+	data: { [key: string]: any };
 }

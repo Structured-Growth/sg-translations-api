@@ -31,7 +31,7 @@ export class ClientService {
 			group: [],
 		});
 
-		const count = countResult[0]?.count || 0;
+		const count = countResult?.count || 0;
 
 		if (count > 0) {
 			throw new ValidationError({
@@ -55,18 +55,19 @@ export class ClientService {
 	): Promise<void> {
 		const { orgId, region, translator, locales } = params;
 
-		const client: Client = await this.clientRepository.read(clientId);
+		const client = await this.clientRepository.read(clientId);
+
 		if (!client) {
 			throw new NotFoundError(`Client with ${clientId} id not found`);
 		}
 
-		const missingLocales: string[] = locales.filter((locale) => !client.dataValues.locales.includes(locale));
+		const missingLocales = locales.filter((locale) => !client.locales.includes(locale));
 
 		if (missingLocales.length > 0) {
 			throw new NotFoundError(`These languages are not supported by the client: ${missingLocales.join(", ")}`);
 		}
 
-		const translations: TranslationAttributes[] = await this.translationService.allTranslations({
+		const translations: TranslationAttributes[] = await this.translationService.getTranslations({
 			orgId,
 			clientId,
 			locales: [...locales, "en-US"],
@@ -74,20 +75,14 @@ export class ClientService {
 
 		if (translations.length > 0) {
 			const jobs: { clientId: number; locale: string; translationsForJob: object }[] = [];
-			const defaultTranslations: TranslationAttributes[] = translations.filter(
-				(translation) => translation.locale === "en-US"
-			);
+			const defaultTranslations = translations.filter((translation) => translation.locale === "en-US");
 
 			for (const locale of locales) {
-				const localeTranslations: TranslationAttributes[] = translations.filter(
-					(translation) => translation.locale === locale
-				);
+				const localeTranslations = translations.filter((translation) => translation.locale === locale);
 				const translationsForJob = {};
 
 				for (const item of localeTranslations) {
-					const defaultTranslation: TranslationAttributes = defaultTranslations.find(
-						(translation) => translation.tokenId === item.tokenId
-					);
+					const defaultTranslation = defaultTranslations.find((translation) => translation.tokenId === item.tokenId);
 					if (defaultTranslation) {
 						translationsForJob[item.id] = defaultTranslation.text;
 					}
@@ -96,12 +91,13 @@ export class ClientService {
 				jobs.push({ clientId, locale, translationsForJob });
 			}
 
+			//TODO Complete aws integration
 			// await this.jobService.createJob(orgId, region, translator, jobs);
 		}
 	}
 
 	public async getLocalizedTranslation(clientId: number, locale: string): Promise<object> {
-		const client: Client = await this.clientRepository.read(clientId);
+		const client = await this.clientRepository.read(clientId);
 		if (!client) {
 			throw new NotFoundError(`Client with ${clientId} id not found`);
 		}
@@ -109,27 +105,27 @@ export class ClientService {
 			throw new NotFoundError(`This language is not in the database`);
 		}
 
-		const orgId: number = client.orgId;
+		const orgId = client.orgId;
 		const jsonItems: { [key: string]: string } = {};
 		let result = {};
 
-		const tokens: TokenAttributes[] = await this.tokenService.allTokens({
+		const tokens = await this.tokenService.getTokens({
 			orgId,
 			clientId,
 		});
 
-		if (!tokens) {
+		if (tokens.length === 0) {
 			throw new NotFoundError(`Tokens with ${clientId} id not found`);
 		}
 
-		const translations = await this.translationService.allTranslations({
+		const translations = await this.translationService.getTranslations({
 			orgId,
 			clientId,
 			locales: [locale],
 			tokensId: tokens.map((token) => token.id),
 		});
 
-		if (!translations) {
+		if (translations.length === 0) {
 			throw new NotFoundError(`Translations with ${clientId} id not found`);
 		}
 
@@ -160,54 +156,62 @@ export class ClientService {
 		const jsonTokens = flattenObjectKeys(data);
 		const jsonTokensNames = Object.keys(jsonTokens);
 
-		const tableTokens: TokenAttributes[] = await this.tokenService.allTokens({
-			orgId,
-			clientId,
-		});
+		await Client.sequelize.transaction(async (transaction) => {
+			const tableTokens: TokenAttributes[] = await this.tokenService.getTokens(
+				{
+					orgId,
+					clientId,
+				},
+				{ transaction }
+			);
 
-		const { newTokens, unusedTokens, commonTokens } = this.tokenService.findDifference({
-			newArray: jsonTokensNames,
-			oldArray: tableTokens.map((item) => ({ token: item.token, id: item.id })),
-		});
-
-		if (unusedTokens.length > 0) {
-			await this.tokenService.deleteMultiple(unusedTokens);
-		}
-
-		if (newTokens.length > 0) {
-			const tokensToCreate: TokenCreateBodyInterface[] = newTokens.map((token) => ({
-				orgId,
-				region,
-				clientId,
-				token,
-			}));
-
-			const createdTokens = await this.tokenService.createMultiple(tokensToCreate);
-
-			const translationsToCreate: TranslationCreateBodyInterface[] = [];
-
-			clientLocales.forEach((locale) => {
-				createdTokens.forEach((token) => {
-					translationsToCreate.push({
-						orgId,
-						region,
-						clientId,
-						tokenId: token.id,
-						locale,
-						text: locale === "en-US" ? jsonTokens[token.token] : "",
-					});
-				});
+			const { newTokens, unusedTokens, commonTokens } = this.tokenService.findDifference({
+				newArray: jsonTokensNames,
+				oldArray: tableTokens.map((item) => ({ token: item.token, id: item.id })),
 			});
 
-			await this.translationService.createMultiple(translationsToCreate);
-		}
+			if (unusedTokens.length > 0) {
+				await this.tokenService.deleteMultiple(unusedTokens, { transaction });
+			}
 
-		await this.translationService.actualizeTranslation({
-			orgId,
-			clientId,
-			locales: clientLocales,
-			commonTokens,
-			jsonTokens,
+			if (newTokens.length > 0) {
+				const tokensToCreate: TokenCreateBodyInterface[] = newTokens.map((token) => ({
+					orgId,
+					region,
+					clientId,
+					token,
+				}));
+
+				const createdTokens = await this.tokenService.createMultiple(tokensToCreate, { transaction });
+
+				const translationsToCreate: TranslationCreateBodyInterface[] = [];
+
+				clientLocales.forEach((locale) => {
+					createdTokens.forEach((token) => {
+						translationsToCreate.push({
+							orgId,
+							region,
+							clientId,
+							tokenId: token.id,
+							locale,
+							text: locale === "en-US" ? jsonTokens[token.token] : "",
+						});
+					});
+				});
+
+				await this.translationService.createMultiple(translationsToCreate, { transaction });
+			}
+
+			await this.translationService.actualizeTranslation(
+				{
+					orgId,
+					clientId,
+					locales: clientLocales,
+					commonTokens,
+					jsonTokens,
+				},
+				{ transaction }
+			);
 		});
 	}
 }

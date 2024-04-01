@@ -2,19 +2,31 @@ import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { Token } from "../../../../database/models/token";
+import { Client } from "../../../../database/models/client";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
-
 
 describe("GET /api/v1/tokens/:tokenId", () => {
 	const { server, context } = initTest();
 	let createdTokenId: number;
+	let createdClientId: number;
 
 	before(async () => {
+		const createdClient = await Client.create({
+			orgId: 2,
+			region: RegionEnum.US,
+			status: "active",
+			title: `TestClientName-${Date.now()}`,
+			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
+			locales: ["us-En", "pt-Pt"],
+		});
+
+		createdClientId = createdClient.id;
+
 		const createdToken = await Token.create({
 			orgId: 2,
 			region: RegionEnum.US,
-			clientId: 2,
-			token: "test.test"
+			clientId: createdClient.id,
+			token: "test.test",
 		});
 
 		createdTokenId = createdToken.id;
@@ -22,6 +34,7 @@ describe("GET /api/v1/tokens/:tokenId", () => {
 
 	after(async () => {
 		await Token.destroy({ where: { id: createdTokenId } });
+		await Client.destroy({ where: { id: createdClientId } });
 	});
 
 	it("Should read token", async () => {

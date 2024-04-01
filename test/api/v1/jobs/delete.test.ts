@@ -1,18 +1,31 @@
 import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
+import { Client } from "../../../../database/models/client";
 import { Job } from "../../../../database/models/job";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
 
 describe("DELETE /api/v1/jobs/:jobId", () => {
 	const { server, context } = initTest();
+	let createdClientId: number;
 	let createdJobId: number;
 
 	before(async () => {
+		const createdClient = await Client.create({
+			orgId: 2,
+			region: RegionEnum.US,
+			status: "active",
+			title: `TestClientName-${Date.now()}`,
+			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
+			locales: ["us-En", "pt-Pt"],
+		});
+
+		createdClientId = createdClient.id;
+
 		const createdJob = await Job.create({
 			orgId: 2,
 			region: RegionEnum.US,
-			clientId: 2,
+			clientId: createdClientId,
 			translator: "Test Translator",
 			status: "in_progress",
 			locales: ["en-US", "fr-FR"],
@@ -22,6 +35,10 @@ describe("DELETE /api/v1/jobs/:jobId", () => {
 		});
 
 		createdJobId = createdJob.id;
+	});
+
+	after(async () => {
+		await Client.destroy({ where: { id: createdClientId } });
 	});
 
 	it("Should delete job", async () => {

@@ -35,7 +35,7 @@ type TranslationKeys = (typeof publicTranslationAttributes)[number];
 type PublicTranslationAttributes = Pick<TranslationAttributes, TranslationKeys>;
 
 @Route("v1/translations")
-@Tags("TranslationsController")
+@Tags("Translations")
 @autoInjectable()
 export class TranslationsController extends BaseController {
 	constructor(
@@ -52,9 +52,6 @@ export class TranslationsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of translations")
 	@DescribeAction("translations/search")
-	@DescribeResource("Organization", ({ query }) => String(query.orgId))
-	@DescribeResource("TokenId", ({ query }) => Number(query.tokenId))
-	@DescribeResource("ClientId", ({ query }) => Number(query.clientId))
 	@DescribeResource("Translation", ({ query }) => Number(query.id))
 	@ValidateFuncArgs(TranslationSearchParamsValidator)
 	async search(
