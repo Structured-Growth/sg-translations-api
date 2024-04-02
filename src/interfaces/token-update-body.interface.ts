@@ -1,3 +1,1 @@
-export interface TokenUpdateBodyInterface {
-
-}
+export interface TokenUpdateBodyInterface {}

@@ -1,5 +1,4 @@
-import {joi, ConfigLoader } from "@structured-growth/microservice-sdk";
-// import * as joi from "joi";
+import { joi, ConfigLoader } from "@structured-growth/microservice-sdk";
 
 export function loadEnvironment() {
 	const loader = new ConfigLoader();

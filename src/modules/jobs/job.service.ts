@@ -1,12 +1,10 @@
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
 import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
-import { JobRepository} from "./job.repository";
+import { JobRepository } from "./job.repository";
 
 @autoInjectable()
 export class JobService {
-	constructor(
-		@inject("JobRepository") private jobRepository: JobRepository,
-	) {}
+	constructor(@inject("JobRepository") private jobRepository: JobRepository) {}
 
 	// public async createJob(
 	// 	orgId: number,

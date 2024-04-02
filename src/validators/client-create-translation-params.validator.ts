@@ -5,6 +5,6 @@ export const ClientCreateTranslationParamsValidator = joi.object({
 	query: joi.object(),
 	body: joi.object({
 		locale: joi.string().max(15).required().label("Locale"),
-		data: joi.object().min(1).required().label("Translate JSON schema")
+		data: joi.object().min(1).required().label("Translate JSON schema"),
 	}),
 });

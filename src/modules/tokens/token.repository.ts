@@ -5,14 +5,14 @@ import {
 	SearchResultInterface,
 	NotFoundError,
 } from "@structured-growth/microservice-sdk";
-import Token, {TokenCreationAttributes} from "../../../database/models/token";
+import Token, { TokenCreationAttributes } from "../../../database/models/token";
 import { TokenSearchParamsInterface } from "../../interfaces/token-search-params.interface";
 import { TokenUpdateBodyInterface } from "../../interfaces/token-update-body.interface";
 
 @autoInjectable()
 export class TokenRepository
-	implements RepositoryInterface<Token, TokenSearchParamsInterface, TokenCreationAttributes> {
-
+	implements RepositoryInterface<Token, TokenSearchParamsInterface, TokenCreationAttributes>
+{
 	public async search(params: TokenSearchParamsInterface): Promise<SearchResultInterface<Token>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;

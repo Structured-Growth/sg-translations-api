@@ -3,14 +3,14 @@ import "./load-environment";
 import { App } from "./app";
 import { container, Lifecycle, logWriters, Logger } from "@structured-growth/microservice-sdk";
 import { loadEnvironment } from "./load-environment";
-import { ClientRepository } from "../modules/clients/client.repository"
+import { ClientRepository } from "../modules/clients/client.repository";
 import { ClientService } from "../modules/clients/client.service";
 import { TokenRepository } from "../modules/tokens/token.repository";
 import { TokenService } from "../modules/tokens/token.service";
 import { TranslationRepository } from "../modules/translations/translation.repository";
 import { TranslationService } from "../modules/translations/translation.service";
-import { JobRepository} from "../modules/jobs/job.repository";
-import { JobService} from "../modules/jobs/job.service";
+import { JobRepository } from "../modules/jobs/job.repository";
+import { JobService } from "../modules/jobs/job.service";
 
 // load and validate env variables
 loadEnvironment();
