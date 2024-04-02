@@ -21,6 +21,11 @@ router.get(pathPrefix + '/v1/translations', handleRequest(Controllers.Translatio
 router.get(pathPrefix + '/v1/translations/:translationId', handleRequest(Controllers.TranslationsController, "get", handlerOpts));
 router.put(pathPrefix + '/v1/translations/:translationId', handleRequest(Controllers.TranslationsController, "update", handlerOpts));
 
+//TranslationSetController
+router.get(pathPrefix + '/v1/translation-set/:clientId/:locale', handleRequest(Controllers.TranslationSetController, "getTranslationSet", handlerOpts));
+router.post(pathPrefix + '/v1/translation-set/:clientId/translate', handleRequest(Controllers.TranslationSetController, "translate", handlerOpts));
+router.post(pathPrefix + '/v1/translation-set/:clientId/upload', handleRequest(Controllers.TranslationSetController, "uploadTranslation", handlerOpts));
+
 //TokensController
 router.get(pathPrefix + '/v1/tokens', handleRequest(Controllers.TokensController, "search", handlerOpts));
 router.get(pathPrefix + '/v1/tokens/:tokenId', handleRequest(Controllers.TokensController, "get", handlerOpts));
@@ -37,9 +42,6 @@ router.post(pathPrefix + '/v1/clients', handleRequest(Controllers.ClientsControl
 router.get(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "get", handlerOpts));
 router.put(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "update", handlerOpts));
 router.delete(pathPrefix + '/v1/clients/:clientId', handleRequest(Controllers.ClientsController, "delete", handlerOpts));
-router.get(pathPrefix + '/v1/clients/:clientId/:locale', handleRequest(Controllers.ClientsController, "getLocalizedMessages", handlerOpts));
-router.post(pathPrefix + '/v1/clients/:clientId/translate', handleRequest(Controllers.ClientsController, "createTranslation", handlerOpts));
-router.post(pathPrefix + '/v1/clients/:clientId/upload', handleRequest(Controllers.ClientsController, "uploadTranslation", handlerOpts));
 
 //JobsController
 router.get(pathPrefix + '/v1/jobs', handleRequest(Controllers.JobsController, "search", handlerOpts));
@@ -56,6 +58,9 @@ export const actionToRouteMap = {
 	"TranslationsController.search": 'get /v1/translations',
 	"TranslationsController.get": 'get /v1/translations/:translationId',
 	"TranslationsController.update": 'put /v1/translations/:translationId',
+	"TranslationSetController.getTranslationSet": 'get /v1/translation-set/:clientId/:locale',
+	"TranslationSetController.translate": 'post /v1/translation-set/:clientId/translate',
+	"TranslationSetController.uploadTranslation": 'post /v1/translation-set/:clientId/upload',
 	"TokensController.search": 'get /v1/tokens',
 	"TokensController.get": 'get /v1/tokens/:tokenId',
 	"SystemController.migrate": 'post /v1/system/migrate',
@@ -65,9 +70,6 @@ export const actionToRouteMap = {
 	"ClientsController.get": 'get /v1/clients/:clientId',
 	"ClientsController.update": 'put /v1/clients/:clientId',
 	"ClientsController.delete": 'delete /v1/clients/:clientId',
-	"ClientsController.getLocalizedMessages": 'get /v1/clients/:clientId/:locale',
-	"ClientsController.createTranslation": 'post /v1/clients/:clientId/translate',
-	"ClientsController.uploadTranslation": 'post /v1/clients/:clientId/upload',
 	"JobsController.search": 'get /v1/jobs',
 	"JobsController.get": 'get /v1/jobs/:jobId',
 	"JobsController.delete": 'delete /v1/jobs/:jobId',

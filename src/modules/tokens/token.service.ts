@@ -81,16 +81,10 @@ export class TokenService {
 			params.orgId && (where["orgId"] = params.orgId);
 			params.clientId && (where["clientId"] = params.clientId);
 
-			const tokens = await Token.findAll({
+			return Token.findAll({
 				where,
 				transaction,
 			});
-
-			if (tokens.length > 0) {
-				return tokens;
-			} else {
-				return [];
-			}
 		};
 
 		return options?.transaction ? action(options.transaction) : Token.sequelize.transaction(action);

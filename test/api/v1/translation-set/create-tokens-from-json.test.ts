@@ -23,10 +23,12 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should create tokens and translation from JSON", async () => {
-		const { statusCode } = await server.post(`/v1/clients/${createdClientId}/upload`).send(gitJsonCorrect);
-		assert.equal(statusCode, 201);
+		const { statusCode } = await server.post(`/v1/translation-set/${createdClientId}/upload`).send(gitJsonCorrect);
+		assert.equal(statusCode, 204);
 
 		const { statusCode: getTokenStatusCode, body: getTokenBody } = await server.get("/v1/tokens").query({
+			orgId: 2,
+			clientId: createdClientId,
 			token: "common.sing_in",
 		});
 		assert.equal(getTokenStatusCode, 200);
@@ -50,7 +52,7 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should return validation error", async () => {
-		const { statusCode, body } = await server.post(`/v1/clients/${createdClientId}/upload`).send(gitJsonIncorrect);
+		const { statusCode, body } = await server.post(`/v1/translation-set/${createdClientId}/upload`).send(gitJsonIncorrect);
 		assert.equal(statusCode, 422);
 		assert.isDefined(body.validation);
 		assert.equal(body.name, "ValidationError");
@@ -58,16 +60,20 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should change tokens and translation from JSON", async () => {
-		const { statusCode, body } = await server.post(`/v1/clients/${createdClientId}/upload`).send(gitJsonChange);
-		assert.equal(statusCode, 201);
+		const { statusCode, body } = await server.post(`/v1/translation-set/${createdClientId}/upload`).send(gitJsonChange);
+		assert.equal(statusCode, 204);
 
 		const { statusCode: getTokenStatusCode, body: getTokenBody } = await server.get("/v1/tokens").query({
+			orgId: 2,
+			clientId: createdClientId,
 			token: "errors.500",
 		});
 		assert.equal(getTokenStatusCode, 200);
 		assert.equal(getTokenBody.total, 0);
 
 		const { statusCode: getCheckTokenStatusCode, body: getCheckTokenBody } = await server.get("/v1/tokens").query({
+			orgId: 2,
+			clientId: createdClientId,
 			token: "errors.404",
 		});
 		assert.equal(getCheckTokenStatusCode, 200);
@@ -95,7 +101,7 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should create JSON for translations", async () => {
-		const { statusCode, body } = await server.get(`/v1/clients/${createdClientId}/en-US`).send({});
+		const { statusCode, body } = await server.get(`/v1/translation-set/${createdClientId}/en-US`).send({});
 		assert.equal(statusCode, 200);
 		assert.isObject(body);
 		assert.containsAllKeys(body.common, ["sing_in", "sing_up"]);
@@ -109,7 +115,7 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should return validation error", async () => {
-		const { statusCode, body } = await server.get(`/v1/clients/${createdClientId}/verylonglanguagesparams`).send({});
+		const { statusCode, body } = await server.get(`/v1/translation-set/${createdClientId}/verylonglanguagesparams`).send({});
 		assert.equal(statusCode, 422);
 		assert.isDefined(body.validation);
 		assert.equal(body.name, "ValidationError");
@@ -117,7 +123,7 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should return not found error", async () => {
-		const { statusCode, body } = await server.get(`/v1/clients/999999/en-US`).send({});
+		const { statusCode, body } = await server.get(`/v1/translation-set/999999/en-US`).send({});
 		assert.equal(statusCode, 404);
 		assert.equal(body.name, "NotFound");
 		assert.isString(body.message);

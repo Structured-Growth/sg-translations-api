@@ -40,12 +40,15 @@ describe("GET /api/v1/tokens", () => {
 	it("Should return 0 tokens", async () => {
 		const { statusCode, body } = await server.get("/v1/tokens").query({
 			orgId: 999999,
+			clientId: createdClientId,
 		});
 		assert.equal(statusCode, 200);
 	});
 
 	it("Should return token", async () => {
 		const { statusCode, body } = await server.get("/v1/tokens").query({
+			orgId: 2,
+			clientId: createdClientId,
 			"id[0]": createdTokenId,
 		});
 		assert.equal(statusCode, 200);
@@ -64,11 +67,15 @@ describe("GET /api/v1/tokens", () => {
 
 	it("Should return validation error", async () => {
 		const { statusCode, body } = await server.get("/v1/tokens").query({
+			orgId: -1,
+			clientId: false,
 			"id[0]": -1,
 		});
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");
 		assert.isString(body.message);
+		assert.isString(body.validation.query.orgId[0][0]);
+		assert.isString(body.validation.query.clientId[0][0]);
 		assert.isString(body.validation.query.id[0][0]);
 	});
 });

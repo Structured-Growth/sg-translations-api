@@ -53,7 +53,7 @@ export class ClientService {
 		clientId: number,
 		params: ClientCreateDynamicTranslateBodyInterface
 	): Promise<void> {
-		const { orgId, region, translator, locales } = params;
+		const { translator, locales } = params;
 
 		const client = await this.clientRepository.read(clientId);
 
@@ -68,7 +68,7 @@ export class ClientService {
 		}
 
 		const translations: TranslationAttributes[] = await this.translationService.getTranslations({
-			orgId,
+			orgId: client.orgId,
 			clientId,
 			locales: [...locales, "en-US"],
 		});
@@ -122,7 +122,7 @@ export class ClientService {
 			orgId,
 			clientId,
 			locales: [locale],
-			tokensId: tokens.map((token) => token.id),
+			tokenId: tokens.map((token) => token.id),
 		});
 
 		if (translations.length === 0) {
@@ -144,7 +144,7 @@ export class ClientService {
 	}
 
 	public async createFromJSON(clientId: number, params: ClientCreateTranslationBodyInterface): Promise<void> {
-		const { data, orgId, region, locale } = params;
+		const { data, locale } = params;
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
@@ -159,7 +159,7 @@ export class ClientService {
 		await Client.sequelize.transaction(async (transaction) => {
 			const tableTokens: TokenAttributes[] = await this.tokenService.getTokens(
 				{
-					orgId,
+					orgId: client.orgId,
 					clientId,
 				},
 				{ transaction }
@@ -176,8 +176,8 @@ export class ClientService {
 
 			if (newTokens.length > 0) {
 				const tokensToCreate: TokenCreateBodyInterface[] = newTokens.map((token) => ({
-					orgId,
-					region,
+					orgId: client.orgId,
+					region: client.region,
 					clientId,
 					token,
 				}));
@@ -189,8 +189,8 @@ export class ClientService {
 				clientLocales.forEach((locale) => {
 					createdTokens.forEach((token) => {
 						translationsToCreate.push({
-							orgId,
-							region,
+							orgId: client.orgId,
+							region: client.region,
 							clientId,
 							tokenId: token.id,
 							locale,
@@ -204,7 +204,7 @@ export class ClientService {
 
 			await this.translationService.actualizeTranslation(
 				{
-					orgId,
+					orgId: client.orgId,
 					clientId,
 					locales: clientLocales,
 					commonTokens,

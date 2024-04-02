@@ -37,11 +37,11 @@ export class TranslationService {
 			params.clientId && (where["clientId"] = params.clientId);
 			params.locales && (where["locale"] = { [Op.in]: params.locales });
 
-			if (params.tokensId) {
-				if (Array.isArray(params.tokensId)) {
-					where["tokenId"] = { [Op.in]: params.tokensId };
+			if (params.tokenId) {
+				if (Array.isArray(params.tokenId)) {
+					where["tokenId"] = { [Op.in]: params.tokenId };
 				} else {
-					where["tokenId"] = params.tokensId;
+					where["tokenId"] = params.tokenId;
 				}
 			}
 
@@ -90,7 +90,7 @@ export class TranslationService {
 				orgId,
 				clientId,
 				locales,
-				tokensId: defaultItems.map((token) => token.id),
+				tokenId: defaultItems.map((token) => token.id),
 			},
 			{ transaction: options?.transaction }
 		);

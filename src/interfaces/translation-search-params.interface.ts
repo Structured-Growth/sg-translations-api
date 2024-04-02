@@ -2,7 +2,7 @@ import { DefaultSearchParamsInterface } from "@structured-growth/microservice-sd
 import { TranslationAttributes } from "../../database/models/translation";
 
 export interface TranslationSearchParamsInterface extends Omit<DefaultSearchParamsInterface, "accountId"> {
-	tokensId?: number[];
-	clientId?: number;
+	clientId: number;
+	tokenId?: number[];
 	locales?: string[];
 }

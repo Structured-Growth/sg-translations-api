@@ -52,7 +52,8 @@ export class TranslationsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of translations")
 	@DescribeAction("translations/search")
-	@DescribeResource("Translation", ({ query }) => Number(query.id))
+	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
+	@DescribeResource("Client", ({ query }) => Number(query.clientId))
 	@ValidateFuncArgs(TranslationSearchParamsValidator)
 	async search(
 		@Queries() query: TranslationSearchParamsInterface

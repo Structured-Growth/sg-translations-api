@@ -1,6 +1,4 @@
 export const gitJsonCorrect = {
-	orgId: 2,
-	region: "us",
 	locale: "en-US",
 	data: {
 		common: {
@@ -64,8 +62,6 @@ export const gitJsonIncorrect = {
 };
 
 export const gitJsonChange = {
-	orgId: 2,
-	region: "us",
 	locale: "en-US",
 	data: {
 		common: {

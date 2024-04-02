@@ -54,12 +54,15 @@ describe("GET /api/v1/translations", () => {
 	it("Should return 0 translations", async () => {
 		const { statusCode, body } = await server.get("/v1/translations").query({
 			orgId: 999999,
+			clientId: createdClientId,
 		});
 		assert.equal(statusCode, 200);
 	});
 
 	it("Should return translation", async () => {
 		const { statusCode, body } = await server.get("/v1/translations").query({
+			orgId: 2,
+			clientId: createdClientId,
 			"id[0]": createdTranslationId,
 		});
 		assert.equal(statusCode, 200);

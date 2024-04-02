@@ -25,7 +25,7 @@ export class TranslationRepository
 
 		params.orgId && (where["orgId"] = params.orgId);
 		params.clientId && (where["clientId"] = params.clientId);
-		params.tokensId && (where["tokenId"] = params.tokensId);
+		params.tokenId && (where["tokenId"] = { [Op.in]: params.tokenId });
 		params.id && (where["id"] = { [Op.in]: params.id });
 		params.locales && (where["locale"] = { [Op.in]: params.locales });
 

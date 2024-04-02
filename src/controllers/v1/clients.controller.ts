@@ -16,16 +16,11 @@ import { ClientService } from "../../modules/clients/client.service";
 import { ClientCreateBodyInterface } from "../../interfaces/client-create-body.interface";
 import { ClientSearchParamsInterface } from "../../interfaces/client-search-params.interface";
 import { ClientUpdateBodyInterface } from "../../interfaces/client-update-body.interface";
-import { ClientCreateTranslationBodyInterface } from "../../interfaces/client-create-translation-body.interface";
-import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/client-create-dynamic-translate-body.interface";
 import { ClientSearchParamsValidator } from "../../validators/client-search-params.validator";
 import { ClientCreateParamsValidator } from "../../validators/client-create-params.validator";
 import { ClientReadParamsValidator } from "../../validators/client-read-params.validator";
 import { ClientUpdateParamsValidator } from "../../validators/client-update-params.validator";
 import { ClientDeleteParamsValidator } from "../../validators/client-delete-params.validator";
-import { ClientCreateTranslationParamsValidator } from "../../validators/client-create-translation-params.validator";
-import { ClientGetLocalizedTranslationParamsValidator } from "../../validators/client-get-localized-translation-params.validator";
-import { ClientCreateDynamicTranslateParamsValidator } from "../../validators/client-create-dynamic-translate-params.validator";
 
 const publicClientAttributes = [
 	"id",
@@ -60,7 +55,7 @@ export class ClientsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of clients")
 	@DescribeAction("clients/search")
-	@DescribeResource("Client", ({ query }) => Number(query.id))
+	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
 	@ValidateFuncArgs(ClientSearchParamsValidator)
 	async search(@Queries() query: ClientSearchParamsInterface): Promise<SearchResultInterface<PublicClientAttributes>> {
 		const { data, ...result } = await this.clientRepository.search(query);
@@ -81,6 +76,7 @@ export class ClientsController extends BaseController {
 	@Post("/")
 	@SuccessResponse(201, "Returns created сlient")
 	@DescribeAction("clients/create")
+	@DescribeResource("Organization", ({ body }) => Number(body.orgId))
 	@ValidateFuncArgs(ClientCreateParamsValidator)
 	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
 		const client = await this.clientService.create(body);
@@ -148,54 +144,5 @@ export class ClientsController extends BaseController {
 	async delete(@Path() clientId: number): Promise<void> {
 		await this.clientRepository.delete(clientId);
 		this.response.status(204);
-	}
-
-	/**
-	 * Getting localized translations
-	 */
-	@OperationId("Get translation JSON")
-	@Get("/:clientId/:locale")
-	@SuccessResponse(200, "Returns localized translations")
-	@DescribeAction("clients/localized-translations")
-	@DescribeResource("Client", ({ params }) => `${params.clientId}/${params.locale}`)
-	@ValidateFuncArgs(ClientGetLocalizedTranslationParamsValidator)
-	async getLocalizedMessages(@Path() clientId: number, @Path() locale: string): Promise<{ [key: string]: any }> {
-		return await this.clientService.getLocalizedTranslation(clientId, locale);
-	}
-
-	/**
-	 * Creating a translation with dynamic locales.
-	 */
-	@OperationId("Create dynamic translations")
-	@Post("/:clientId/translate")
-	@SuccessResponse(201, "Returns successful translations.")
-	@DescribeAction("clients/translation/dynamic")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
-	@ValidateFuncArgs(ClientCreateDynamicTranslateParamsValidator)
-	async createTranslation(
-		@Path() clientId: number,
-		@Queries() query: {},
-		@Body() body: ClientCreateDynamicTranslateBodyInterface
-	): Promise<void> {
-		await this.clientService.createJobTranslation(clientId, body);
-	}
-
-	/**
-	 * Translation creation for the client.
-	 */
-	@OperationId("Create tokens and translations from JSON")
-	@Post("/:clientId/upload")
-	@SuccessResponse(201, "Returns successful translations.")
-	@DescribeAction("clients/translation/upload")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
-	@ValidateFuncArgs(ClientCreateTranslationParamsValidator)
-	async uploadTranslation(
-		@Path() clientId: number,
-		@Queries() query: {},
-		@Body() body: ClientCreateTranslationBodyInterface
-	): Promise<void> {
-		await this.clientService.createFromJSON(clientId, body);
-
-		this.response.status(201);
 	}
 }
