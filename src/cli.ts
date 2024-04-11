@@ -3,11 +3,17 @@ import "./app/providers";
 import { AppMock } from "./app/app.mock";
 import { container, generateApiDocs, Lifecycle } from "@structured-growth/microservice-sdk";
 import { program } from "commander";
-import { startWebServer } from "./api";
 
 program.option("-e, --env-file <envFile>", "path to .env file", ".env");
 
-program.command("web").description("Runs a web server").action(startWebServer);
+program
+	.command("web")
+	.description("Runs a web server")
+	.action(async () => {
+		const { startWebServer } = await require("./api");
+		await startWebServer();
+	});
+
 program
 	.command("docs")
 	.description("Generate API docs")
