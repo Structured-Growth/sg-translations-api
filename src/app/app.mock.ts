@@ -35,7 +35,12 @@ export class AppMock {
 	 * Connect to a database and automatically initialize models
 	 */
 	protected async connectToDatabase() {
-		this.sequelize = new Sequelize({ dialect: "postgres" });
+		try {
+			this.sequelize = new Sequelize({ dialect: "postgres" });
+			await this.sequelize.authenticate();
+		} catch (e) {
+			// should through error, it's ok
+		}
 		this.sequelize.addModels([path.join(__dirname, "..", "..", "database", "models")]);
 	}
 }
