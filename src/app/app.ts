@@ -38,14 +38,7 @@ export class App {
 	 */
 	protected async connectToDatabase() {
 		const config = await dbConfig();
-		try {
-			this.sequelize = await connectDatabase(Sequelize, config, this.logDbRequests);
-		} catch (e) {
-			this.sequelize = new Sequelize({
-				dialect: "postgres",
-			});
-			console.log(e);
-		}
+		this.sequelize = await connectDatabase(Sequelize, config, this.logDbRequests);
 		this.sequelize.addModels([path.join(__dirname, "..", "..", "database", "models")]);
 	}
 }
