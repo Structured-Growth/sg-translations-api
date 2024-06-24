@@ -1,7 +1,16 @@
 import "reflect-metadata";
 import "./load-environment";
 import { App } from "./app";
-import { container, Lifecycle, logWriters, Logger } from "@structured-growth/microservice-sdk";
+import {
+	container,
+	Lifecycle,
+	logWriters,
+	Logger,
+	AuthService,
+	PolicyService,
+	eventBusProviders,
+	EventbusService,
+} from "@structured-growth/microservice-sdk";
 import { loadEnvironment } from "./load-environment";
 import { ClientRepository } from "../modules/clients/client.repository";
 import { ClientService } from "../modules/clients/client.service";
@@ -35,6 +44,17 @@ container.register("ClientService", ClientService);
 container.register("TranslationService", TranslationService);
 container.register("TokenService", TokenService);
 container.register("JobService", JobService);
+
+container.register("authenticationEnabled", { useValue: process.env.AUTHENTICATION_ENABLED === "true" });
+container.register("authorizationEnabled", { useValue: process.env.AUTHORIZATION_ENABLED === "true" });
+container.register("oAuthServiceGetUserUrl", { useValue: process.env.OAUTH_USER_URL });
+container.register("policiesServiceUrl", { useValue: process.env.POLICY_SERVICE_URL });
+container.register("AuthService", AuthService);
+container.register("PolicyService", PolicyService);
+
+container.register("eventbusName", { useValue: process.env.EVENTBUS_NAME || "sg-eventbus-dev" });
+container.register("EventbusProvider", eventBusProviders[process.env.EVENTBUS_PROVIDER || "TestEventbusProvider"]);
+container.register("EventbusService", EventbusService);
 
 // repositories
 container.register("ClientRepository", ClientRepository);

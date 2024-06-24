@@ -36,7 +36,7 @@ export class TokensController extends BaseController {
 	@SuccessResponse(200, "Returns list of tokens")
 	@DescribeAction("tokens/search")
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
-	@DescribeResource("Client", ({ query }) => String(query.clientId))
+	@DescribeResource("Client", ({ query }) => Number(query.clientId))
 	@ValidateFuncArgs(TokenSearchParamsValidator)
 	async search(@Queries() query: TokenSearchParamsInterface): Promise<SearchResultInterface<PublicTokenAttributes>> {
 		const { data, ...result } = await this.tokenRepository.search(query);
