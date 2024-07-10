@@ -47,6 +47,11 @@ container.register("JobService", JobService);
 
 container.register("authenticationEnabled", { useValue: process.env.AUTHENTICATION_ENABLED === "true" });
 container.register("authorizationEnabled", { useValue: process.env.AUTHORIZATION_ENABLED === "true" });
+container.register("internalAuthenticationEnabled", {
+	useValue: process.env.INTERNAL_AUTHENTICATION_ENABLED === "true",
+});
+container.register("internalRequestsAllowed", { useValue: process.env.INTERNAL_REQUESTS_ALLOWED === "true" });
+container.register("internalAuthenticationJwtSecret", { useValue: process.env.INTERNAL_AUTHENTICATION_JWT_SECRET });
 container.register("oAuthServiceGetUserUrl", { useValue: process.env.OAUTH_USER_URL });
 container.register("policiesServiceUrl", { useValue: process.env.POLICY_SERVICE_URL });
 container.register("AuthService", AuthService);
