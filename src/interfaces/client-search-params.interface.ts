@@ -2,6 +2,7 @@ import { DefaultSearchParamsInterface } from "@structured-growth/microservice-sd
 
 export interface ClientSearchParamsInterface extends Omit<DefaultSearchParamsInterface, "accountId"> {
 	status?: string[];
+	title?: string[];
 	clientName?: string[];
 	locales?: string[];
 }
