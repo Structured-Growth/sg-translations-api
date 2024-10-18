@@ -16,6 +16,7 @@ import { pick } from "lodash";
 import { JobSearchParamsValidator } from "../../validators/job-search-params.validator";
 import { JobReadParamsValidator } from "../../validators/job-read-params.validator";
 import { JobDeleteParamsValidator } from "../../validators/job-delete-params.validator";
+import { EventMutation } from "@structured-growth/microservice-sdk";
 
 const publicJobAttributes = [
 	"id",
@@ -96,7 +97,18 @@ export class JobsController extends BaseController {
 	@DescribeResource("Job", ({ params }) => Number(params.jobId))
 	@ValidateFuncArgs(JobDeleteParamsValidator)
 	async delete(@Path() jobId: number): Promise<void> {
+		const job = await this.jobRepository.read(jobId);
+
+		if (!job) {
+			throw new NotFoundError(`Job ${jobId} not found`);
+		}
+
 		await this.jobRepository.delete(jobId);
+
+		await this.eventBus.publish(
+			new EventMutation(this.principal.arn, job.arn, `${this.appPrefix}:jobs/delete`, JSON.stringify({}))
+		);
+
 		this.response.status(204);
 	}
 }

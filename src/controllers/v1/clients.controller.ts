@@ -21,6 +21,7 @@ import { ClientCreateParamsValidator } from "../../validators/client-create-para
 import { ClientReadParamsValidator } from "../../validators/client-read-params.validator";
 import { ClientUpdateParamsValidator } from "../../validators/client-update-params.validator";
 import { ClientDeleteParamsValidator } from "../../validators/client-delete-params.validator";
+import { EventMutation } from "@structured-growth/microservice-sdk";
 
 const publicClientAttributes = [
 	"id",
@@ -82,6 +83,10 @@ export class ClientsController extends BaseController {
 		const client = await this.clientService.create(body);
 		this.response.status(201);
 
+		await this.eventBus.publish(
+			new EventMutation(this.principal.arn, client.arn, `${this.appPrefix}:clients/create`, JSON.stringify(body))
+		);
+
 		return {
 			...(pick(client.toJSON(), publicClientAttributes) as PublicClientAttributes),
 			arn: client.arn,
@@ -126,6 +131,10 @@ export class ClientsController extends BaseController {
 	): Promise<PublicClientAttributes> {
 		const client = await this.clientRepository.update(clientId, body);
 
+		await this.eventBus.publish(
+			new EventMutation(this.principal.arn, client.arn, `${this.appPrefix}:clients/update`, JSON.stringify(body))
+		);
+
 		return {
 			...(pick(client.toJSON(), publicClientAttributes) as PublicClientAttributes),
 			arn: client.arn,
@@ -142,7 +151,18 @@ export class ClientsController extends BaseController {
 	@DescribeResource("Client", ({ params }) => Number(params.clientId))
 	@ValidateFuncArgs(ClientDeleteParamsValidator)
 	async delete(@Path() clientId: number): Promise<void> {
+		const client = await this.clientRepository.read(clientId);
+
+		if (!client) {
+			throw new NotFoundError(`Client ${clientId} not found`);
+		}
+
 		await this.clientRepository.delete(clientId);
+
+		await this.eventBus.publish(
+			new EventMutation(this.principal.arn, client.arn, `${this.appPrefix}:clients/delete`, JSON.stringify({}))
+		);
+
 		this.response.status(204);
 	}
 }
