@@ -24,6 +24,12 @@ export class ClientRepository
 		params.id && (where["id"] = { [Op.in]: params.id });
 		params.locales && (where["locales"] = { [Op.contains]: params.locales });
 
+		if (params.title?.length > 0) {
+			where["title"] = {
+				[Op.or]: params.title.map((str) => ({ [Op.iLike]: str.replace(/\*/g, "%") })),
+			};
+		}
+
 		if (params.clientName?.length > 0) {
 			where["clientName"] = {
 				[Op.or]: params.clientName.map((str) => ({ [Op.iLike]: str.replace(/\*/g, "%") })),

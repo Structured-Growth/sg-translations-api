@@ -18,6 +18,7 @@ import { TranslationUpdateBodyInterface } from "../../interfaces/translation-upd
 import { TranslationSearchParamsValidator } from "../../validators/translation-search-params.validator";
 import { TranslationReadParamsValidator } from "../../validators/translation-read-params.validator";
 import { TranslationUpdateParamsValidator } from "../../validators/translation-update-params.validator";
+import { EventMutation } from "@structured-growth/microservice-sdk";
 
 const publicTranslationAttributes = [
 	"id",
@@ -106,6 +107,15 @@ export class TranslationsController extends BaseController {
 		@Body() body: TranslationUpdateBodyInterface
 	): Promise<PublicTranslationAttributes> {
 		const translation = await this.translationRepository.update(translationId, body);
+
+		await this.eventBus.publish(
+			new EventMutation(
+				this.principal.arn,
+				translation.arn,
+				`${this.appPrefix}:translations/update`,
+				JSON.stringify(body)
+			)
+		);
 
 		return {
 			...(pick(translation.toJSON(), publicTranslationAttributes) as PublicTranslationAttributes),
