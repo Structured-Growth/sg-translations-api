@@ -55,6 +55,7 @@ export class TranslationsController extends BaseController {
 	@DescribeAction("translations/search")
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
 	@DescribeResource("Client", ({ query }) => Number(query.clientId))
+	@DescribeResource("Translation", ({ query }) => query.id?.map(Number))
 	@ValidateFuncArgs(TranslationSearchParamsValidator)
 	async search(
 		@Queries() query: TranslationSearchParamsInterface
