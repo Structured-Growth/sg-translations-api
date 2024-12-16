@@ -57,6 +57,7 @@ export class ClientsController extends BaseController {
 	@SuccessResponse(200, "Returns list of clients")
 	@DescribeAction("clients/search")
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
+	@DescribeResource("Client", ({ query }) => query.id?.map(Number))
 	@ValidateFuncArgs(ClientSearchParamsValidator)
 	async search(@Queries() query: ClientSearchParamsInterface): Promise<SearchResultInterface<PublicClientAttributes>> {
 		const { data, ...result } = await this.clientRepository.search(query);

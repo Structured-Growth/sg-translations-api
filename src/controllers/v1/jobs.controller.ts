@@ -51,7 +51,8 @@ export class JobsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of jobs")
 	@DescribeAction("jobs/search")
-	@DescribeResource("Job", ({ query }) => Number(query.id))
+	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
+	@DescribeResource("Job", ({ query }) => query.id?.map(Number))
 	@ValidateFuncArgs(JobSearchParamsValidator)
 	async search(@Queries() query: JobSearchParamsInterface): Promise<SearchResultInterface<PublicJobAttributes>> {
 		const { data, ...result } = await this.jobRepository.search(query);
