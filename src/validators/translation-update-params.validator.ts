@@ -5,5 +5,6 @@ export const TranslationUpdateParamsValidator = joi.object({
 	query: joi.object(),
 	body: joi.object({
 		text: joi.string().required().label("Text"),
+		metadata: joi.object().label("Metadata"),
 	}),
 });

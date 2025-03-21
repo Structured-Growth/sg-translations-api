@@ -5,7 +5,7 @@ export const TranslationSearchParamsValidator = joi.object({
 	query: joi
 		.object({
 			orgId: joi.number().positive().required().label("Organization Id"),
-			tokenId: joi.number().positive().label("Token Id"),
+			tokenId: joi.array().items(joi.number().positive()).label("Token Id"),
 			clientId: joi.number().positive().required().label("Client Id"),
 			locales: joi.array().items(joi.string().max(15)).label("Locale"),
 		})
