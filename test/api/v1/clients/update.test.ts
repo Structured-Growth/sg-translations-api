@@ -14,6 +14,7 @@ describe("PUT /api/v1/clients/:clientId", () => {
 		clientName: `TestClientName-${Date.now()}`.toLowerCase(),
 		locales: ["us-En", "pt-Pt"],
 		contextPath: "client",
+		defaultLocale: "us-En",
 	});
 
 	it("Should update client", async () => {

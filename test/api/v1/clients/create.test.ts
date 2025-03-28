@@ -11,6 +11,7 @@ describe("POST /api/v1/clients", () => {
 	const randomTitle = `TestClientName-${Date.now()}`;
 	const clientName = randomTitle.toLowerCase();
 	const locales = ["en-US", "pt-PT"];
+	const defaultLocale = "en-US";
 
 	it("Should create client", async () => {
 		const { statusCode, body } = await server.post("/v1/clients").send({
@@ -20,6 +21,7 @@ describe("POST /api/v1/clients", () => {
 			title: randomTitle,
 			clientName,
 			locales,
+			defaultLocale,
 		});
 		assert.equal(statusCode, 201);
 		assert.isNumber(body.id);
@@ -42,6 +44,7 @@ describe("POST /api/v1/clients", () => {
 			title: 42,
 			clientName: "mistake",
 			locales: ["de-DE", "it-IT"],
+			defaultLocale: 77,
 		});
 		assert.equal(statusCode, 422);
 		assert.isDefined(body.validation);
@@ -58,6 +61,7 @@ describe("POST /api/v1/clients", () => {
 			title: randomTitle,
 			clientName,
 			locales,
+			defaultLocale,
 		});
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");

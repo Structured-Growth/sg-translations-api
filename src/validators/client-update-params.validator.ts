@@ -8,5 +8,6 @@ export const ClientUpdateParamsValidator = joi.object({
 		title: joi.string().max(100).label("Title"),
 		clientName: joi.string().max(100).label("Client Name"),
 		locales: joi.array().items(joi.string().max(15).label("Locales")),
+		defaultLocale: joi.string().max(15).label("Default locale"),
 	}),
 });

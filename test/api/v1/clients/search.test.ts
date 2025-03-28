@@ -1,7 +1,7 @@
 import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
-import { createClient} from "../../../common/create-client";
+import { createClient } from "../../../common/create-client";
 
 describe("GET /api/v1/clients", () => {
 	const { server, context } = initTest();
@@ -14,6 +14,7 @@ describe("GET /api/v1/clients", () => {
 		clientName: `TestClientName-${Date.now()}`.toLowerCase(),
 		locales: ["us-En", "pt-Pt"],
 		contextPath: "client",
+		defaultLocale: "us-En",
 	});
 
 	it("Should return 0 clients", async () => {
@@ -45,7 +46,7 @@ describe("GET /api/v1/clients", () => {
 			"id[0]": -1,
 			orgId: "a",
 			page: 0,
-			limit: false
+			limit: false,
 		});
 		assert.equal(statusCode, 422);
 		assert.equal(body.name, "ValidationError");
