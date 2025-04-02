@@ -108,23 +108,35 @@ jobs:
             echo "✅ .env file updated successfully."
           
             echo "🚀 Starting temporary API server for migration..."
-            nohup npm run dev > server.log 2>&1 &
+            HTTP_PORT=3000 nohup npm run dev > server.log 2>&1 &
             SERVER_PID=$!
             echo "📌 Server PID: $SERVER_PID"
+          
+            tail -f server.log &
+            TAIL_PID=$!
           
             (
               sleep 300
               echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
               kill $SERVER_PID 2>/dev/null && echo "🛑 Server killed after timeout."
+              kill $TAIL_PID 2>/dev/null
             ) &
             
             sleep 30
             
             echo "⚙️ Running DB migrations..."
-            curl -X POST http://localhost:3302/v1/system/migrate || { echo "❌ Migration failed!" >&2; kill $SERVER_PID 2>/dev/null; exit 1; }
+            curl -X POST http://localhost:3000/v1/system/migrate || {
+              echo "❌ Migration failed!" >&2
+              echo "📄 Server logs before failure:"
+              tail -n 50 server.log
+              kill $SERVER_PID 2>/dev/null
+              kill $TAIL_PID 2>/dev/null
+              exit 1
+            }
             
             echo "✅ Migration finished. Cleaning up temporary server..."
             kill $SERVER_PID 2>/dev/null && echo "🧹 Server process cleaned up."
+            kill $TAIL_PID 2>/dev/null
             
             echo "🛠 Building the API..."
             npm run build
