@@ -118,8 +118,8 @@ jobs:
             (
               sleep 300
               echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
-              pkill -f "ts-node src/cli.ts web"
               pkill -f "nodemon"
+              pkill -f "ts-node src/cli.ts web"
               kill $TAIL_PID 2>/dev/null
             ) &
             TIMEOUT_PID=$!
@@ -154,16 +154,16 @@ jobs:
               echo "📋 Top memory consumers:"
               ps aux --sort=-%mem | head -n 5
             
-              pkill -f "ts-node src/cli.ts web"
               pkill -f "nodemon"
+              pkill -f "ts-node src/cli.ts web"
               kill $TAIL_PID 2>/dev/null
               kill $TIMEOUT_PID 2>/dev/null
               exit 1
             }
             
             echo "✅ Migration finished. Cleaning up temporary server..."
-            pkill -f "ts-node src/cli.ts web"
             pkill -f "nodemon"
+            pkill -f "ts-node src/cli.ts web"
             kill $TAIL_PID 2>/dev/null
             kill $TIMEOUT_PID 2>/dev/null && echo "🛑 Timeout task cancelled."
           
