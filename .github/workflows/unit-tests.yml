@@ -106,7 +106,26 @@ jobs:
             sed -i 's/^DB_MIGRATION_TABLE_SCHEMA=.*/DB_MIGRATION_TABLE_SCHEMA=${{ secrets.DB_SCHEMA }}/' .env
 
             echo "✅ .env file updated successfully."
-
+          
+            echo "🚀 Starting temporary API server for migration..."
+            nohup npm run dev > server.log 2>&1 &
+            SERVER_PID=$!
+            echo "📌 Server PID: $SERVER_PID"
+          
+            (
+              sleep 300
+              echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
+              kill $SERVER_PID 2>/dev/null && echo "🛑 Server killed after timeout."
+            ) &
+            
+            sleep 30
+            
+            echo "⚙️ Running DB migrations..."
+            curl -X POST http://localhost:3000/v1/system/migrate || { echo "❌ Migration failed!" >&2; kill $SERVER_PID 2>/dev/null; exit 1; }
+            
+            echo "✅ Migration finished. Cleaning up temporary server..."
+            kill $SERVER_PID 2>/dev/null && echo "🧹 Server process cleaned up."
+            
             echo "🛠 Building the API..."
             npm run build
 
