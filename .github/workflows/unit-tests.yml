@@ -109,8 +109,7 @@ jobs:
           
             echo "🚀 Starting temporary API server for new migration..."
             HTTP_PORT=3000 nohup npm run dev > server.log 2>&1 &
-            SERVER_PID=$!
-            echo "📌 Server PID: $SERVER_PID"
+            echo "📌 Server started (via npm run dev)"
           
             tail -f server.log &
             TAIL_PID=$!
@@ -119,7 +118,9 @@ jobs:
             (
               sleep 300
               echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
-              kill $SERVER_PID 2>/dev/null && echo "🛑 Server killed after timeout."
+              pkill -f "ts-node src/cli.ts web"
+              pkill -f "nodemon"
+              pkill -f "npm run dev"
               kill $TAIL_PID 2>/dev/null
             ) &
             TIMEOUT_PID=$!
@@ -154,14 +155,18 @@ jobs:
               echo "📋 Top memory consumers:"
               ps aux --sort=-%mem | head -n 5
             
-              kill $SERVER_PID 2>/dev/null
+              pkill -f "ts-node src/cli.ts web"
+              pkill -f "nodemon"
+              pkill -f "npm run dev"
               kill $TAIL_PID 2>/dev/null
               kill $TIMEOUT_PID 2>/dev/null
               exit 1
             }
             
             echo "✅ Migration finished. Cleaning up temporary server..."
-            kill $SERVER_PID 2>/dev/null && echo "🧹 Server process cleaned up."
+            pkill -f "ts-node src/cli.ts web"
+            pkill -f "nodemon"
+            pkill -f "npm run dev"
             kill $TAIL_PID 2>/dev/null
             kill $TIMEOUT_PID 2>/dev/null && echo "🛑 Timeout task cancelled."
           
