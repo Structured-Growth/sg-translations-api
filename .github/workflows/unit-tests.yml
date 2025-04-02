@@ -115,28 +115,54 @@ jobs:
             tail -f server.log &
             TAIL_PID=$!
           
+            TIMEOUT_PID=""
             (
               sleep 300
               echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
               kill $SERVER_PID 2>/dev/null && echo "🛑 Server killed after timeout."
               kill $TAIL_PID 2>/dev/null
             ) &
+            TIMEOUT_PID=$!
+  
+  
+            echo "🧠 Memory usage before migration:"
+            free -m
+          
+            echo "📋 Top memory consumers:"
+            ps aux --sort=-%mem | head -n 5
             
             sleep 30
             
             echo "⚙️ Running DB migrations..."
-            curl -X POST http://localhost:3000/v1/system/migrate || {
+            echo "⚙️ Running DB migrations..."
+              curl --max-time 30 -X POST http://localhost:3000/v1/system/migrate || {
               echo "❌ Migration failed!" >&2
+            
               echo "📄 Server logs before failure:"
               tail -n 50 server.log
+            
+              echo "🧠 Memory snapshot on failure:"
+              free -m
+            
+              echo "📋 Top memory consumers:"
+              ps aux --sort=-%mem | head -n 5
+            
               kill $SERVER_PID 2>/dev/null
               kill $TAIL_PID 2>/dev/null
+              kill $TIMEOUT_PID 2>/dev/null
               exit 1
             }
             
             echo "✅ Migration finished. Cleaning up temporary server..."
             kill $SERVER_PID 2>/dev/null && echo "🧹 Server process cleaned up."
             kill $TAIL_PID 2>/dev/null
+            kill $TIMEOUT_PID 2>/dev/null && echo "🛑 Timeout task cancelled."
+          
+            echo "🧠 Memory after cleanup:"
+            free -m
+            
+            echo "📋 Top memory consumers (post):"
+            ps aux --sort=-%mem | head -n 5
             
             echo "🛠 Building the API..."
             npm run build
