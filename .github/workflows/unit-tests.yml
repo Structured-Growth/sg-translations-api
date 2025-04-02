@@ -131,10 +131,18 @@ jobs:
             echo "📋 Top memory consumers:"
             ps aux --sort=-%mem | head -n 5
             
-            sleep 30
-            
+            for i in {1..30}; do
+              if curl -s http://localhost:3000/v1/ping/alive >/dev/null; then
+                echo "✅ Server is up"
+                break
+              fi
+              echo "⏳ Waiting for server to start..."
+              sleep 1
+            done
+  
+  
             echo "⚙️ Running DB migrations..."
-              curl --max-time 30 -X POST http://localhost:3000/v1/system/migrate || {
+            curl --max-time 30 -X POST http://localhost:3000/v1/system/migrate || {
               echo "❌ Migration failed!" >&2
             
               echo "📄 Server logs before failure:"
