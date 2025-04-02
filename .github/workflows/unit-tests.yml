@@ -121,7 +121,7 @@ jobs:
             sleep 30
             
             echo "⚙️ Running DB migrations..."
-            curl -X POST http://localhost:3000/v1/system/migrate || { echo "❌ Migration failed!" >&2; kill $SERVER_PID 2>/dev/null; exit 1; }
+            curl -X POST http://localhost:3302/v1/system/migrate || { echo "❌ Migration failed!" >&2; kill $SERVER_PID 2>/dev/null; exit 1; }
             
             echo "✅ Migration finished. Cleaning up temporary server..."
             kill $SERVER_PID 2>/dev/null && echo "🧹 Server process cleaned up."
