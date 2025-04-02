@@ -120,7 +120,6 @@ jobs:
               echo "⏰ Timeout reached: killing server (PID $SERVER_PID)"
               pkill -f "ts-node src/cli.ts web"
               pkill -f "nodemon"
-              pkill -f "npm run dev"
               kill $TAIL_PID 2>/dev/null
             ) &
             TIMEOUT_PID=$!
@@ -157,7 +156,6 @@ jobs:
             
               pkill -f "ts-node src/cli.ts web"
               pkill -f "nodemon"
-              pkill -f "npm run dev"
               kill $TAIL_PID 2>/dev/null
               kill $TIMEOUT_PID 2>/dev/null
               exit 1
@@ -166,7 +164,6 @@ jobs:
             echo "✅ Migration finished. Cleaning up temporary server..."
             pkill -f "ts-node src/cli.ts web"
             pkill -f "nodemon"
-            pkill -f "npm run dev"
             kill $TAIL_PID 2>/dev/null
             kill $TIMEOUT_PID 2>/dev/null && echo "🛑 Timeout task cancelled."
           
