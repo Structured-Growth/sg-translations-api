@@ -107,7 +107,7 @@ jobs:
 
             echo "✅ .env file updated successfully."
           
-            echo "🚀 Starting temporary API server for migration..."
+            echo "🚀 Starting temporary API server for new migration..."
             HTTP_PORT=3000 nohup npm run dev > server.log 2>&1 &
             SERVER_PID=$!
             echo "📌 Server PID: $SERVER_PID"
