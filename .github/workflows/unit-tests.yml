@@ -134,7 +134,6 @@ jobs:
             sleep 30
             
             echo "⚙️ Running DB migrations..."
-            echo "⚙️ Running DB migrations..."
               curl --max-time 30 -X POST http://localhost:3000/v1/system/migrate || {
               echo "❌ Migration failed!" >&2
             
