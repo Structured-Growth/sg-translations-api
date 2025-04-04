@@ -23,6 +23,7 @@ export class ClientRepository
 		params.status && (where["status"] = { [Op.in]: params.status });
 		params.id && (where["id"] = { [Op.in]: params.id });
 		params.locales && (where["locales"] = { [Op.contains]: params.locales });
+		params.defaultLocale && (where["defaultLocale"] = { [Op.in]: params.defaultLocale });
 
 		if (params.title?.length > 0) {
 			where["title"] = {

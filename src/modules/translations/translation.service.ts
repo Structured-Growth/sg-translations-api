@@ -74,14 +74,14 @@ export class TranslationService {
 			transaction?: Transaction;
 		}
 	): Promise<void> {
-		const { orgId, clientId, locales, commonTokens, jsonTokens } = params;
+		const { orgId, clientId, locales, defaultLocale, commonTokens, jsonTokens } = params;
 		const translationsForChange: { id: number; text: string }[] = [];
 
 		const defaultItems = commonTokens.map((commonToken) => {
 			return {
 				token: commonToken.token,
 				id: commonToken.id,
-				textEn: jsonTokens[commonToken.token],
+				text: jsonTokens[commonToken.token],
 			};
 		});
 
@@ -97,15 +97,60 @@ export class TranslationService {
 
 		translationsForCheck.map((translation) => {
 			const newToken = defaultItems.find((token) => token.id === translation.tokenId);
-			if (newToken.textEn !== translation.text && translation.locale === "en-US") {
-				translationsForChange.push({ id: translation.id, text: newToken.textEn });
+			if (newToken.text !== translation.text && translation.locale === defaultLocale) {
+				translationsForChange.push({ id: translation.id, text: newToken.text });
 
 				for (const item of translationsForCheck) {
-					if (item.tokenId === newToken.id && item.locale !== "en-US") {
+					if (item.tokenId === newToken.id && item.locale !== defaultLocale) {
 						translationsForChange.push({ id: item.id, text: "" });
 					}
 				}
 			}
+		});
+
+		if (translationsForChange) {
+			for (const translation of translationsForChange) {
+				await this.translationRepository.update(
+					translation.id,
+					{
+						text: translation.text,
+					},
+					options?.transaction
+				);
+			}
+		}
+	}
+
+	public async updateTranslations(
+		params: TranslationCheckParamsInterface,
+		options?: {
+			transaction?: Transaction;
+		}
+	): Promise<void> {
+		const { orgId, clientId, locales, commonTokens, jsonTokens } = params;
+		const translationsForChange: { id: number; text: string }[] = [];
+
+		const defaultItems = commonTokens.map((commonToken) => {
+			return {
+				token: commonToken.token,
+				id: commonToken.id,
+				text: jsonTokens[commonToken.token],
+			};
+		});
+
+		const translationsForCheck = await this.getTranslations(
+			{
+				orgId,
+				clientId,
+				locales,
+				tokenId: defaultItems.map((token) => token.id),
+			},
+			{ transaction: options?.transaction }
+		);
+
+		translationsForCheck.map((translation) => {
+			const newToken = defaultItems.find((token) => token.id === translation.tokenId);
+			translationsForChange.push({ id: translation.id, text: newToken.text });
 		});
 
 		if (translationsForChange) {

@@ -9,6 +9,7 @@ export const ClientSearchParamsValidator = joi.object({
 			title: joi.array().items(joi.string().max(100)).label("Title"),
 			clientName: joi.array().items(joi.string().max(100)).label("Client Name"),
 			locales: joi.array().items(joi.string().max(15)).label("Locales"),
+			defaultLocale: joi.array().items(joi.string().max(15)).label("Default Locale"),
 		})
 		.concat(CommonSearchParamsValidator),
 });

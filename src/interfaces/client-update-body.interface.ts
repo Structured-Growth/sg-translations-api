@@ -5,4 +5,5 @@ export interface ClientUpdateBodyInterface {
 	title?: string;
 	clientName?: string;
 	locales?: ClientAttributes["locales"];
+	defaultLocale?: string;
 }

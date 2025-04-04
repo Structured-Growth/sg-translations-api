@@ -18,6 +18,7 @@ describe("GET /api/v1/tokens", () => {
 			title: `TestClientName-${Date.now()}`,
 			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
 			locales: ["us-En", "pt-Pt"],
+			defaultLocale: "us-En",
 		});
 
 		createdClientId = createdClient.id;
