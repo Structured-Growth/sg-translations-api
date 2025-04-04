@@ -13,6 +13,7 @@ import flattenObjectKeys from "../../helpers/flatten-object-keys";
 import convertToObject from "../../helpers/convert-to-object";
 import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/client-create-dynamic-translate-body.interface";
 import { TranslationAttributes } from "../../../database/models/translation";
+import { ClientGetLocalizedTranslationParamsInterface } from "../../interfaces/client-get-localized-translation-params.interface";
 
 @autoInjectable()
 export class ClientService {
@@ -46,6 +47,7 @@ export class ClientService {
 			title: params.title,
 			clientName: params.clientName,
 			locales: params.locales,
+			defaultLocale: params.defaultLocale,
 		});
 	}
 
@@ -96,7 +98,13 @@ export class ClientService {
 		}
 	}
 
-	public async getLocalizedTranslation(clientId: number, locale: string): Promise<object> {
+	public async getLocalizedTranslation(
+		clientId: number,
+		locale: string,
+		params: ClientGetLocalizedTranslationParamsInterface
+	): Promise<object> {
+		const { format } = params;
+
 		const client = await this.clientRepository.read(clientId);
 		if (!client) {
 			throw new NotFoundError(`Client with ${clientId} id not found`);
@@ -137,14 +145,18 @@ export class ClientService {
 		});
 
 		if (Object.keys(jsonItems).length !== 0) {
-			result = convertToObject(jsonItems);
+			if (format === "dot") {
+				result = jsonItems;
+			} else {
+				result = convertToObject(jsonItems);
+			}
 		}
 
 		return result;
 	}
 
 	public async createFromJSON(clientId: number, params: ClientCreateTranslationBodyInterface): Promise<void> {
-		const { data, locale } = params;
+		const { data } = params;
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
@@ -194,7 +206,7 @@ export class ClientService {
 							clientId,
 							tokenId: token.id,
 							locale,
-							text: locale === "en-US" ? jsonTokens[token.token] : "",
+							text: locale === client.defaultLocale ? jsonTokens[token.token] : "",
 						});
 					});
 				});
@@ -207,6 +219,58 @@ export class ClientService {
 					orgId: client.orgId,
 					clientId,
 					locales: clientLocales,
+					defaultLocale: client.defaultLocale,
+					commonTokens,
+					jsonTokens,
+				},
+				{ transaction }
+			);
+		});
+	}
+
+	public async updateFromJSON(clientId: number, params: ClientCreateTranslationBodyInterface): Promise<void> {
+		const { data, locale } = params;
+
+		const client = await this.clientRepository.read(clientId);
+
+		if (!client) {
+			throw new NotFoundError(`Client with ${clientId} id not found`);
+		}
+
+		const jsonTokens = flattenObjectKeys(data);
+		const jsonTokensNames = Object.keys(jsonTokens);
+
+		await Client.sequelize.transaction(async (transaction) => {
+			const tableTokens: TokenAttributes[] = await this.tokenService.getTokens(
+				{
+					orgId: client.orgId,
+					clientId,
+				},
+				{ transaction }
+			);
+
+			const { newTokens, unusedTokens, commonTokens } = this.tokenService.findDifference({
+				newArray: jsonTokensNames,
+				oldArray: tableTokens.map((item) => ({ token: item.token, id: item.id })),
+			});
+
+			if (unusedTokens.length > 0) {
+				throw new ValidationError({
+					clientName: "There are non-existent tokens in the scheme, remove them from the schema",
+				});
+			}
+
+			if (newTokens.length > 0) {
+				throw new ValidationError({
+					clientName: "There are new tokens in the schema, remove them from the schema",
+				});
+			}
+
+			await this.translationService.updateTranslations(
+				{
+					orgId: client.orgId,
+					clientId,
+					locales: [locale],
 					commonTokens,
 					jsonTokens,
 				},

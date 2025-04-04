@@ -11,13 +11,14 @@ export interface ClientAttributes extends Omit<DefaultModelInterface, keyof Belo
 	title: string;
 	clientName: string;
 	locales: string[];
+	defaultLocale: string;
 }
 
 export interface ClientCreationAttributes
 	extends Omit<ClientAttributes, "id" | "arn" | "createdAt" | "updatedAt" | "deletedAt"> {}
 
 export interface ClientUpdateAttributes
-	extends Partial<Pick<ClientAttributes, "status" | "title" | "clientName" | "locales">> {}
+	extends Partial<Pick<ClientAttributes, "status" | "title" | "clientName" | "locales" | "defaultLocale">> {}
 
 @Table({
 	tableName: "clients",
@@ -42,6 +43,9 @@ export class Client extends Model<ClientAttributes, ClientCreationAttributes> im
 
 	@Column(DataType.ARRAY(DataType.STRING))
 	locales: string[];
+
+	@Column
+	defaultLocale: string;
 
 	static get arnPattern(): string {
 		return [container.resolve("appPrefix"), "<region>", "<orgId>", "<accountId>", "clients/<clientId>"].join(":");

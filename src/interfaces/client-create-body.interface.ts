@@ -6,4 +6,5 @@ export interface ClientCreateBodyInterface {
 	title: string;
 	clientName: string;
 	locales: string[];
+	defaultLocale: string;
 }

@@ -5,4 +5,5 @@ export interface ClientSearchParamsInterface extends Omit<DefaultSearchParamsInt
 	title?: string[];
 	clientName?: string[];
 	locales?: string[];
+	defaultLocale?: string[];
 }

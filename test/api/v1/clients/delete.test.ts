@@ -1,7 +1,7 @@
 import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
-import { createClient} from "../../../common/create-client";
+import { createClient } from "../../../common/create-client";
 
 describe("DELETE /api/v1/clients/:clientId", () => {
 	const { server, context } = initTest();
@@ -14,6 +14,7 @@ describe("DELETE /api/v1/clients/:clientId", () => {
 		clientName: `TestClientName-${Date.now()}`.toLowerCase(),
 		locales: ["us-En", "pt-Pt"],
 		contextPath: "client",
+		defaultLocale: "us-En",
 	});
 
 	it("Should delete client", async () => {

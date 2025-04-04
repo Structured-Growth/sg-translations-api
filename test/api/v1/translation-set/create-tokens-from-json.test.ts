@@ -2,7 +2,7 @@ import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { Client } from "../../../../database/models/client";
-import { gitJsonCorrect, gitJsonChange, gitJsonIncorrect } from "../../../dummy-data/git-json";
+import { gitJsonCorrect, gitJsonChange, gitJsonIncorrect, gitJsonChangePt } from "../../../dummy-data/git-json";
 import { RegionEnum } from "@structured-growth/microservice-sdk";
 
 describe("Check JSON operations", () => {
@@ -16,7 +16,8 @@ describe("Check JSON operations", () => {
 			status: "active",
 			title: `TestClientName-${Date.now()}`,
 			clientName: `TestClientName-${Date.now()}`.toLowerCase(),
-			locales: ["en-US", "pt-Pt"],
+			locales: ["en-US", "pt-PT"],
+			defaultLocale: "en-US",
 		});
 
 		createdClientId = createdClient.id;
@@ -52,7 +53,9 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should return validation error", async () => {
-		const { statusCode, body } = await server.post(`/v1/translation-set/${createdClientId}/upload`).send(gitJsonIncorrect);
+		const { statusCode, body } = await server
+			.post(`/v1/translation-set/${createdClientId}/upload`)
+			.send(gitJsonIncorrect);
 		assert.equal(statusCode, 422);
 		assert.isDefined(body.validation);
 		assert.equal(body.name, "ValidationError");
@@ -115,7 +118,9 @@ describe("Check JSON operations", () => {
 	});
 
 	it("Should return validation error", async () => {
-		const { statusCode, body } = await server.get(`/v1/translation-set/${createdClientId}/verylonglanguagesparams`).send({});
+		const { statusCode, body } = await server
+			.get(`/v1/translation-set/${createdClientId}/verylonglanguagesparams`)
+			.send({});
 		assert.equal(statusCode, 422);
 		assert.isDefined(body.validation);
 		assert.equal(body.name, "ValidationError");
@@ -127,5 +132,39 @@ describe("Check JSON operations", () => {
 		assert.equal(statusCode, 404);
 		assert.equal(body.name, "NotFound");
 		assert.isString(body.message);
+	});
+
+	it("Should update translations using service updateTranslations", async () => {
+		const tokenResponse = await server.get("/v1/tokens").query({
+			orgId: 2,
+			clientId: createdClientId,
+			token: "common.sing_in",
+		});
+		assert.equal(tokenResponse.statusCode, 200);
+		const tokenId = tokenResponse.body.data[0].id;
+
+		const translationResponse = await server.get("/v1/translations").query({
+			orgId: 2,
+			clientId: createdClientId,
+			"tokenId[0]": tokenId,
+			"locales[0]": "pt-PT",
+		});
+
+		assert.equal(translationResponse.statusCode, 200);
+		assert.equal(translationResponse.body.data[0].text, "");
+
+		const { statusCode, body } = await server
+			.post(`/v1/translation-set/${createdClientId}/update`)
+			.send(gitJsonChangePt);
+		assert.equal(statusCode, 204);
+
+		const updatedTranslationRes = await server.get("/v1/translations").query({
+			orgId: 2,
+			clientId: createdClientId,
+			"tokenId[0]": tokenId,
+			"locales[0]": "pt-PT",
+		});
+		assert.equal(updatedTranslationRes.statusCode, 200);
+		assert.equal(updatedTranslationRes.body.data[0].text, "Iniciar Sessão");
 	});
 });

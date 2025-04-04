@@ -34,6 +34,7 @@ const publicClientAttributes = [
 	"title",
 	"clientName",
 	"locales",
+	"defaultLocale",
 ] as const;
 type ClientKeys = (typeof publicClientAttributes)[number];
 type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;

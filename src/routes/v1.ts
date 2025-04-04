@@ -25,6 +25,7 @@ router.put(pathPrefix + '/v1/translations/:translationId', handleRequest(Control
 router.get(pathPrefix + '/v1/translation-set/:clientId/:locale', handleRequest(Controllers.TranslationSetController, "getTranslationSet", handlerOpts));
 router.post(pathPrefix + '/v1/translation-set/:clientId/translate', handleRequest(Controllers.TranslationSetController, "translate", handlerOpts));
 router.post(pathPrefix + '/v1/translation-set/:clientId/upload', handleRequest(Controllers.TranslationSetController, "uploadTranslation", handlerOpts));
+router.post(pathPrefix + '/v1/translation-set/:clientId/update', handleRequest(Controllers.TranslationSetController, "updateTranslation", handlerOpts));
 
 //TokensController
 router.get(pathPrefix + '/v1/tokens', handleRequest(Controllers.TokensController, "search", handlerOpts));
@@ -61,6 +62,7 @@ export const actionToRouteMap = {
 	"TranslationSetController.getTranslationSet": 'get /v1/translation-set/:clientId/:locale',
 	"TranslationSetController.translate": 'post /v1/translation-set/:clientId/translate',
 	"TranslationSetController.uploadTranslation": 'post /v1/translation-set/:clientId/upload',
+	"TranslationSetController.updateTranslation": 'post /v1/translation-set/:clientId/update',
 	"TokensController.search": 'get /v1/tokens',
 	"TokensController.get": 'get /v1/tokens/:tokenId',
 	"SystemController.migrate": 'post /v1/system/migrate',
