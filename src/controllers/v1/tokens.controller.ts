@@ -8,6 +8,7 @@ import {
 	NotFoundError,
 	SearchResultInterface,
 	ValidateFuncArgs,
+	I18nType,
 } from "@structured-growth/microservice-sdk";
 import { TokenRepository } from "../../modules/tokens/token.repository";
 import { TokenSearchParamsInterface } from "../../interfaces/token-search-params.interface";
@@ -24,8 +25,13 @@ type PublicTokenAttributes = Pick<TokenAttributes, TokenKeys>;
 @Tags("Tokens")
 @autoInjectable()
 export class TokensController extends BaseController {
-	constructor(@inject("TokenRepository") private tokenRepository: TokenRepository) {
+	private i18n: I18nType;
+	constructor(
+		@inject("TokenRepository") private tokenRepository: TokenRepository,
+		@inject("i18n") private getI18n: () => I18nType
+	) {
 		super();
+		this.i18n = this.getI18n();
 	}
 
 	/**
@@ -64,7 +70,7 @@ export class TokensController extends BaseController {
 		const token = await this.tokenRepository.read(tokenId);
 
 		if (!token) {
-			throw new NotFoundError(`Token ${token} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.token.name")} ${token} ${this.i18n.__("error.common.not_found")}`);
 		}
 
 		return {

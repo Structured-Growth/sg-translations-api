@@ -4,6 +4,8 @@ import {
 	RepositoryInterface,
 	SearchResultInterface,
 	NotFoundError,
+	I18nType,
+	inject,
 } from "@structured-growth/microservice-sdk";
 import Token, { TokenCreationAttributes } from "../../../database/models/token";
 import { TokenSearchParamsInterface } from "../../interfaces/token-search-params.interface";
@@ -13,6 +15,10 @@ import { TokenUpdateBodyInterface } from "../../interfaces/token-update-body.int
 export class TokenRepository
 	implements RepositoryInterface<Token, TokenSearchParamsInterface, TokenCreationAttributes>
 {
+	private i18n: I18nType;
+	constructor(@inject("i18n") private getI18n: () => I18nType) {
+		this.i18n = this.getI18n();
+	}
 	public async search(params: TokenSearchParamsInterface): Promise<SearchResultInterface<Token>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -60,7 +66,7 @@ export class TokenRepository
 		const token = await this.read(id);
 
 		if (!token) {
-			throw new NotFoundError(`Token ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.token.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 		token.setAttributes(params);
 
@@ -71,7 +77,7 @@ export class TokenRepository
 		const n = await Token.destroy({ where: { id } });
 
 		if (n === 0) {
-			throw new NotFoundError(`Token ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.token.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 	}
 }

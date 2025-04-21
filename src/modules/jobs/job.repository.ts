@@ -4,12 +4,18 @@ import {
 	RepositoryInterface,
 	SearchResultInterface,
 	NotFoundError,
+	I18nType,
+	inject,
 } from "@structured-growth/microservice-sdk";
 import Job, { JobCreationAttributes, JobUpdateAttributes } from "../../../database/models/job";
 import { JobSearchParamsInterface } from "../../interfaces/job-search-params.interface";
 
 @autoInjectable()
 export class JobRepository implements RepositoryInterface<Job, JobSearchParamsInterface, JobCreationAttributes> {
+	private i18n: I18nType;
+	constructor(@inject("i18n") private getI18n: () => I18nType) {
+		this.i18n = this.getI18n();
+	}
 	public async search(params: JobSearchParamsInterface): Promise<SearchResultInterface<Job>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -60,7 +66,7 @@ export class JobRepository implements RepositoryInterface<Job, JobSearchParamsIn
 		const job = await this.read(id);
 
 		if (!job) {
-			throw new NotFoundError(`Job ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.job.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 		job.setAttributes(params);
 
@@ -71,7 +77,7 @@ export class JobRepository implements RepositoryInterface<Job, JobSearchParamsIn
 		const n = await Job.destroy({ where: { id } });
 
 		if (n === 0) {
-			throw new NotFoundError(`Client ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.job.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 	}
 }

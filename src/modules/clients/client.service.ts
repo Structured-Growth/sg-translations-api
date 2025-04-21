@@ -1,4 +1,4 @@
-import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
+import { autoInjectable, inject, NotFoundError, ValidationError, I18nType } from "@structured-growth/microservice-sdk";
 import Client from "../../../database/models/client";
 import { TokenAttributes } from "../../../database/models/token";
 import { ClientCreateBodyInterface } from "../../interfaces/client-create-body.interface";
@@ -17,12 +17,16 @@ import { ClientGetLocalizedTranslationParamsInterface } from "../../interfaces/c
 
 @autoInjectable()
 export class ClientService {
+	private i18n: I18nType;
 	constructor(
 		@inject("ClientRepository") private clientRepository: ClientRepository,
 		@inject("TokenService") private tokenService: TokenService,
 		@inject("TranslationService") private translationService: TranslationService,
-		@inject("JobService") private jobService: JobService
-	) {}
+		@inject("JobService") private jobService: JobService,
+		@inject("i18n") private getI18n: () => I18nType
+	) {
+		this.i18n = this.getI18n();
+	}
 
 	public async create(params: ClientCreateBodyInterface): Promise<Client> {
 		const { clientName } = params;
@@ -36,7 +40,7 @@ export class ClientService {
 
 		if (count > 0) {
 			throw new ValidationError({
-				clientName: "Client with the same name is already exist",
+				clientName: this.i18n.__("error.client.exist"),
 			});
 		}
 
@@ -60,13 +64,15 @@ export class ClientService {
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
-			throw new NotFoundError(`Client with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		const missingLocales = locales.filter((locale) => !client.locales.includes(locale));
 
 		if (missingLocales.length > 0) {
-			throw new NotFoundError(`These languages are not supported by the client: ${missingLocales.join(", ")}`);
+			throw new NotFoundError(`${this.i18n.__("error.client.languages_not_supported")} ${missingLocales.join(", ")}`);
 		}
 
 		const translations: TranslationAttributes[] = await this.translationService.getTranslations({
@@ -107,10 +113,12 @@ export class ClientService {
 
 		const client = await this.clientRepository.read(clientId);
 		if (!client) {
-			throw new NotFoundError(`Client with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 		if (!client.locales.includes(locale)) {
-			throw new NotFoundError(`This language is not in the database`);
+			throw new NotFoundError(this.i18n.__("error.client.not_database"));
 		}
 
 		const orgId = client.orgId;
@@ -123,7 +131,9 @@ export class ClientService {
 		});
 
 		if (tokens.length === 0) {
-			throw new NotFoundError(`Tokens with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.tokens")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		const translations = await this.translationService.getTranslations({
@@ -134,7 +144,9 @@ export class ClientService {
 		});
 
 		if (translations.length === 0) {
-			throw new NotFoundError(`Translations with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.translations")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		tokens.forEach((token) => {
@@ -160,7 +172,9 @@ export class ClientService {
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
-			throw new NotFoundError(`Client with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		const clientLocales = client.locales;
@@ -234,7 +248,9 @@ export class ClientService {
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
-			throw new NotFoundError(`Client with ${clientId} id not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		const jsonTokens = flattenObjectKeys(data);
@@ -256,13 +272,13 @@ export class ClientService {
 
 			if (unusedTokens.length > 0) {
 				throw new ValidationError({
-					clientName: "There are non-existent tokens in the scheme, remove them from the schema",
+					clientName: this.i18n.__("error.client.non_existent_tokens"),
 				});
 			}
 
 			if (newTokens.length > 0) {
 				throw new ValidationError({
-					clientName: "There are new tokens in the schema, remove them from the schema",
+					clientName: this.i18n.__("error.client.new_tokens"),
 				});
 			}
 
