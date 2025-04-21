@@ -4,13 +4,13 @@ import { CommonSearchParamsValidator } from "./common-search-params.validator";
 export const JobSearchParamsValidator = joi.object({
 	query: joi
 		.object({
-			orgId: joi.number().positive().label("Organization Id"),
-			clientId: joi.number().positive().label("Client Id"),
-			translator: joi.array().items(joi.string().max(20)).label("Status"),
-			status: joi.array().items(joi.string().valid("completed", "inProgress", "error")).label("Status"),
-			locales: joi.array().items(joi.string().max(15).label("Locales")),
-			clientName: joi.string().max(100).label("Client Name"),
-			launchType: joi.array().items(joi.string().valid("admin", "git")).label("Launch type"),
+			orgId: joi.number().positive().label("validator.jobs.orgId"),
+			clientId: joi.number().positive().label("validator.jobs.clientId"),
+			translator: joi.array().items(joi.string().max(20)).label("validator.jobs.translator"),
+			status: joi.array().items(joi.string().valid("completed", "inProgress", "error")).label("validator.jobs.status"),
+			locales: joi.array().items(joi.string().max(15).label("validator.jobs.locales")),
+			clientName: joi.string().max(100).label("validator.jobs.clientName"),
+			launchType: joi.array().items(joi.string().valid("admin", "git")).label("validator.jobs.launchType"),
 		})
 		.concat(CommonSearchParamsValidator),
 });

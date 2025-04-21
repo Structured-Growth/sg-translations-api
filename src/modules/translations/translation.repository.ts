@@ -4,6 +4,8 @@ import {
 	RepositoryInterface,
 	SearchResultInterface,
 	NotFoundError,
+	I18nType,
+	inject,
 } from "@structured-growth/microservice-sdk";
 import { Transaction } from "sequelize/types";
 import Translation, {
@@ -16,6 +18,10 @@ import { TranslationSearchParamsInterface } from "../../interfaces/translation-s
 export class TranslationRepository
 	implements RepositoryInterface<Translation, TranslationSearchParamsInterface, TranslationCreationAttributes>
 {
+	private i18n: I18nType;
+	constructor(@inject("i18n") private getI18n: () => I18nType) {
+		this.i18n = this.getI18n();
+	}
 	public async search(params: TranslationSearchParamsInterface): Promise<SearchResultInterface<Translation>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -69,7 +75,9 @@ export class TranslationRepository
 	): Promise<Translation> {
 		const translation = await this.read(id, {}, transaction);
 		if (!translation) {
-			throw new NotFoundError(`Translation ${id} not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.translation.name")} ${id} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		translation.setAttributes(params);
@@ -81,7 +89,9 @@ export class TranslationRepository
 		const n = await Translation.destroy({ where: { id } });
 
 		if (n === 0) {
-			throw new NotFoundError(`Translation ${id} not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.translation.name")} ${id} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 	}
 }

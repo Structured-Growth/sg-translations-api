@@ -8,6 +8,7 @@ import {
 	NotFoundError,
 	SearchResultInterface,
 	ValidateFuncArgs,
+	I18nType,
 } from "@structured-growth/microservice-sdk";
 import { TranslationAttributes } from "../../../database/models/translation";
 import { TranslationRepository } from "../../modules/translations/translation.repository";
@@ -39,11 +40,14 @@ type PublicTranslationAttributes = Pick<TranslationAttributes, TranslationKeys>;
 @Tags("Translations")
 @autoInjectable()
 export class TranslationsController extends BaseController {
+	private i18n: I18nType;
 	constructor(
 		@inject("TranslationRepository") private translationRepository: TranslationRepository,
-		@inject("TranslationService") private translationService: TranslationService
+		@inject("TranslationService") private translationService: TranslationService,
+		@inject("i18n") private getI18n: () => I18nType
 	) {
 		super();
+		this.i18n = this.getI18n();
 	}
 
 	/**
@@ -84,7 +88,9 @@ export class TranslationsController extends BaseController {
 		const translation = await this.translationRepository.read(translationId);
 
 		if (!translation) {
-			throw new NotFoundError(`Translation ${translation} not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.translation.name")} ${translation} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		return {

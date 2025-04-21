@@ -1,4 +1,4 @@
-import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
+import { autoInjectable, inject, NotFoundError, ValidationError, I18nType } from "@structured-growth/microservice-sdk";
 import { Transaction } from "sequelize/types";
 import Token, { TokenAttributes } from "../../../database/models/token";
 import { TokenRepository } from "./token.repository";
@@ -9,10 +9,14 @@ import { TokenFindDifferenceParamsInterface } from "../../interfaces/token-fine-
 
 @autoInjectable()
 export class TokenService {
+	private i18n: I18nType;
 	constructor(
 		@inject("TokenRepository") private tokenRepository: TokenRepository,
-		@inject("TranslationService") private translationService: TranslationService
-	) {}
+		@inject("TranslationService") private translationService: TranslationService,
+		@inject("i18n") private getI18n: () => I18nType
+	) {
+		this.i18n = this.getI18n();
+	}
 
 	public async create(params: TokenCreateBodyInterface): Promise<Token> {
 		const token = params.token;
@@ -25,7 +29,7 @@ export class TokenService {
 
 		if (count > 0) {
 			throw new ValidationError({
-				token: "Token with the same name is already exist",
+				token: this.i18n.__("error.token.exist"),
 			});
 		}
 
@@ -62,7 +66,7 @@ export class TokenService {
 			const n = await Token.destroy({ where: { id: tokens }, transaction });
 
 			if (n === 0) {
-				throw new NotFoundError(`None of the clients with tokens ids were found`);
+				throw new NotFoundError(this.i18n.__("error.token.none_clients"));
 			}
 		};
 
