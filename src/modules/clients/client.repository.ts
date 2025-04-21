@@ -4,6 +4,8 @@ import {
 	RepositoryInterface,
 	SearchResultInterface,
 	NotFoundError,
+	I18nType,
+	inject,
 } from "@structured-growth/microservice-sdk";
 import Client, { ClientCreationAttributes, ClientUpdateAttributes } from "../../../database/models/client";
 import { ClientSearchParamsInterface } from "../../interfaces/client-search-params.interface";
@@ -12,6 +14,10 @@ import { ClientSearchParamsInterface } from "../../interfaces/client-search-para
 export class ClientRepository
 	implements RepositoryInterface<Client, ClientSearchParamsInterface, ClientCreationAttributes>
 {
+	private i18n: I18nType;
+	constructor(@inject("i18n") private getI18n: () => I18nType) {
+		this.i18n = this.getI18n();
+	}
 	public async search(params: ClientSearchParamsInterface): Promise<SearchResultInterface<Client>> {
 		const page = params.page || 1;
 		const limit = params.limit || 20;
@@ -72,7 +78,7 @@ export class ClientRepository
 		const client = await this.read(id);
 
 		if (!client) {
-			throw new NotFoundError(`Client ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.client.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 		client.setAttributes(params);
 
@@ -83,7 +89,7 @@ export class ClientRepository
 		const n = await Client.destroy({ where: { id } });
 
 		if (n === 0) {
-			throw new NotFoundError(`Client ${id} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.client.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 	}
 }

@@ -8,6 +8,7 @@ import {
 	NotFoundError,
 	SearchResultInterface,
 	ValidateFuncArgs,
+	I18nType,
 } from "@structured-growth/microservice-sdk";
 import { pick } from "lodash";
 import { ClientAttributes } from "../../../database/models/client";
@@ -43,11 +44,14 @@ type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;
 @Tags("Clients")
 @autoInjectable()
 export class ClientsController extends BaseController {
+	private i18n: I18nType;
 	constructor(
 		@inject("ClientRepository") private clientRepository: ClientRepository,
-		@inject("ClientService") private clientService: ClientService
+		@inject("ClientService") private clientService: ClientService,
+		@inject("i18n") private getI18n: () => I18nType
 	) {
 		super();
+		this.i18n = this.getI18n();
 	}
 
 	/**
@@ -108,7 +112,9 @@ export class ClientsController extends BaseController {
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
-			throw new NotFoundError(`Client ${client} not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${client} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		return {
@@ -156,7 +162,9 @@ export class ClientsController extends BaseController {
 		const client = await this.clientRepository.read(clientId);
 
 		if (!client) {
-			throw new NotFoundError(`Client ${clientId} not found`);
+			throw new NotFoundError(
+				`${this.i18n.__("error.client.name")} ${clientId} ${this.i18n.__("error.common.not_found")}`
+			);
 		}
 
 		await this.clientRepository.delete(clientId);

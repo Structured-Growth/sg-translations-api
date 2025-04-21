@@ -1,0 +1,87 @@
+{
+  "system": {
+    "ping":  {
+      "am": "I'm",
+      "service": "service"
+    }
+  },
+  "error": {
+    "common": {
+      "not_found": "not found"
+    },
+    "client": {
+      "name": "Client",
+      "exist": "Client with the same name is already exist",
+      "languages_not_supported": "These languages are not supported by the client:",
+      "not_database": "This language is not in the database",
+      "tokens": "Tokens with",
+      "translations": "Translations with",
+      "non_existent_tokens": "There are non-existent tokens in the scheme, remove them from the schema",
+      "new_tokens": "There are new tokens in the schema, remove them from the schema"
+    },
+    "job": {
+      "name": "Job"
+    },
+    "token": {
+      "name": "Token",
+      "exist": "Token with the same name is already exist",
+      "none_clients": "None of the clients with tokens ids were found"
+    },
+    "translation": {
+      "name": "Translation",
+      "none_clients": "None of the clients with tokens ids were found"
+    }
+  },
+  "validator": {
+    "common": {
+      "id": "Entity IDs",
+      "arn": "Entity ARNs",
+      "page": "Page",
+      "limit": "Limit",
+      "sort": "Sort"
+    },
+    "clients": {
+      "orgId": "Organization Id",
+      "region": "Region",
+      "status": "Status",
+      "title": "Title",
+      "clientName": "Client Name",
+      "locales": "Locales",
+      "defaultLocale": "Default Locale",
+      "clientId": "Client Id"
+    },
+    "jobs": {
+      "orgId": "Organization Id",
+      "clientId": "Client Id",
+      "translator": "Translator",
+      "status": "Status",
+      "locales": "Locales",
+      "clientName": "Client Name",
+      "launchType": "Launch type",
+      "jobId": "Job Id"
+    },
+    "tokens": {
+      "orgId": "Organization Id",
+      "clientId": "Client Id",
+      "token": "Token",
+      "tokenId": "Token Id"
+    },
+    "translationsSet": {
+      "clientId": "Client Id",
+      "locale": "Locale",
+      "format": "Format",
+      "translator": "Translator",
+      "locales": "Locales",
+      "data": "Translate JSON schema"
+    },
+    "translations": {
+      "orgId": "Organization Id",
+      "tokenId": "Token Id",
+      "clientId": "Client Id",
+      "locales": "Locales",
+      "translationId": "Translation Id",
+      "text": "Text",
+      "metadata": "Metadata"
+    }
+  }
+}

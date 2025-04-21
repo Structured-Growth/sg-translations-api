@@ -1,4 +1,4 @@
-import { autoInjectable, inject, NotFoundError, ValidationError } from "@structured-growth/microservice-sdk";
+import { autoInjectable, inject, NotFoundError, ValidationError, I18nType } from "@structured-growth/microservice-sdk";
 import { Op } from "sequelize";
 import { Transaction } from "sequelize/types";
 import Translation, { TranslationAttributes } from "../../../database/models/translation";
@@ -9,7 +9,13 @@ import { TranslationCreateBodyInterface } from "../../interfaces/translation-cre
 
 @autoInjectable()
 export class TranslationService {
-	constructor(@inject("TranslationRepository") private translationRepository: TranslationRepository) {}
+	private i18n: I18nType;
+	constructor(
+		@inject("TranslationRepository") private translationRepository: TranslationRepository,
+		@inject("i18n") private getI18n: () => I18nType
+	) {
+		this.i18n = this.getI18n();
+	}
 
 	public async createMultiple(
 		params: TranslationCreateBodyInterface[],
@@ -64,7 +70,7 @@ export class TranslationService {
 		const n = await Translation.destroy({ where: { tokenId: tokens }, transaction });
 
 		if (n === 0) {
-			throw new NotFoundError(`None of the clients with tokens ids were found`);
+			throw new NotFoundError(this.i18n.__("error.translation.none_clients"));
 		}
 	}
 

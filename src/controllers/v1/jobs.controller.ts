@@ -8,6 +8,7 @@ import {
 	NotFoundError,
 	SearchResultInterface,
 	ValidateFuncArgs,
+	I18nType,
 } from "@structured-growth/microservice-sdk";
 import { JobAttributes } from "../../../database/models/job";
 import { JobRepository } from "../../modules/jobs/job.repository";
@@ -40,8 +41,13 @@ type PublicJobAttributes = Pick<JobAttributes, JobKeys>;
 @Tags("Jobs")
 @autoInjectable()
 export class JobsController extends BaseController {
-	constructor(@inject("JobRepository") private jobRepository: JobRepository) {
+	private i18n: I18nType;
+	constructor(
+		@inject("JobRepository") private jobRepository: JobRepository,
+		@inject("i18n") private getI18n: () => I18nType
+	) {
 		super();
+		this.i18n = this.getI18n();
 	}
 
 	/**
@@ -79,7 +85,7 @@ export class JobsController extends BaseController {
 		const job = await this.jobRepository.read(jobId);
 
 		if (!job) {
-			throw new NotFoundError(`Job ${job} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.job.name")} ${job} ${this.i18n.__("error.common.not_found")}`);
 		}
 
 		return {
@@ -101,7 +107,7 @@ export class JobsController extends BaseController {
 		const job = await this.jobRepository.read(jobId);
 
 		if (!job) {
-			throw new NotFoundError(`Job ${jobId} not found`);
+			throw new NotFoundError(`${this.i18n.__("error.job.name")} ${jobId} ${this.i18n.__("error.common.not_found")}`);
 		}
 
 		await this.jobRepository.delete(jobId);
