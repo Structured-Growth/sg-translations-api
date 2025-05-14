@@ -41,34 +41,26 @@ jobs:
       DB_MASTER_PASSWORD: ${{ secrets.DB_MASTER_PASSWORD }}
       DB_SCHEMA: ${{ secrets.DB_SCHEMA }}
 
-  # 4. security test and generate report
-  security:
-    needs: [ prettier-check, unit-tests ]
-    name: Security check
-    uses: ./.github/workflows/security.yml
-    secrets:
-      NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-    if: success()
-
-  # 5. dependencies generate report
+  # 4. dependencies generate report
   dependencies:
-    needs: [ prettier-check, unit-tests, security ]
-    name: Security check
-    uses: ./.github/workflows/software-dependencies.yml
+    needs: [ unit-tests, prettier-check ]
+    name: Dependencies
+    uses: ./.github/workflows/dependencies.yml
     secrets:
       NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      REPORT_TITLE: Devices API dependencies report
     if: success()
 
-  # 6. documentation generate reports
+  # 5. documentation generate reports
   documentation:
-    needs: [ prettier-check, unit-tests, security, dependencies ]
+    needs: [ prettier-check, unit-tests, dependencies ]
     name: Security check
     uses: ./.github/workflows/documentation.yml
     if: success()
 
-  # 7. release create
+  # 6. release create
   release:
-    needs: [ prettier-check, unit-tests, security, dependencies, documentation ]
+    needs: [ prettier-check, unit-tests, dependencies, documentation ]
     name: Release
     runs-on: ubuntu-latest
     env:
@@ -108,9 +100,9 @@ jobs:
         run: node_modules/.bin/semantic-release --dockerRegistry=$REGISTRY_URI
     if: success()
 
-  # 8. slack notification about created release
+  # 7. slack notification about created release
   notify-slack:
-    needs: [ prettier-check, unit-tests, security, dependencies, documentation, release ]
+    needs: [ prettier-check, unit-tests, dependencies, documentation, release ]
     name: Notify Slack
     uses: ./.github/workflows/slack-notification-rel.yml
     with:
