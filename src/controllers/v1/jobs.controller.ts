@@ -9,6 +9,7 @@ import {
 	SearchResultInterface,
 	ValidateFuncArgs,
 	I18nType,
+	HashFields,
 } from "@structured-growth/microservice-sdk";
 import { JobAttributes } from "../../../database/models/job";
 import { JobRepository } from "../../modules/jobs/job.repository";
@@ -59,6 +60,7 @@ export class JobsController extends BaseController {
 	@DescribeAction("jobs/search")
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
 	@DescribeResource("Job", ({ query }) => query.id?.map(Number))
+	@HashFields(["clientName"])
 	@ValidateFuncArgs(JobSearchParamsValidator)
 	async search(@Queries() query: JobSearchParamsInterface): Promise<SearchResultInterface<PublicJobAttributes>> {
 		const { data, ...result } = await this.jobRepository.search(query);
@@ -80,6 +82,7 @@ export class JobsController extends BaseController {
 	@SuccessResponse(200, "Returns job")
 	@DescribeAction("jobs/read")
 	@DescribeResource("Job", ({ params }) => Number(params.jobId))
+	@HashFields(["clientName"])
 	@ValidateFuncArgs(JobReadParamsValidator)
 	async get(@Path() jobId: number): Promise<PublicJobAttributes> {
 		const job = await this.jobRepository.read(jobId);

@@ -9,6 +9,7 @@ import {
 	SearchResultInterface,
 	ValidateFuncArgs,
 	I18nType,
+	HashFields,
 } from "@structured-growth/microservice-sdk";
 import { TranslationAttributes } from "../../../database/models/translation";
 import { TranslationRepository } from "../../modules/translations/translation.repository";
@@ -60,6 +61,7 @@ export class TranslationsController extends BaseController {
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
 	@DescribeResource("Client", ({ query }) => Number(query.clientId))
 	@DescribeResource("Translation", ({ query }) => query.id?.map(Number))
+	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationSearchParamsValidator)
 	async search(
 		@Queries() query: TranslationSearchParamsInterface
@@ -83,6 +85,7 @@ export class TranslationsController extends BaseController {
 	@SuccessResponse(200, "Returns translation")
 	@DescribeAction("translations/read")
 	@DescribeResource("Translation", ({ params }) => Number(params.translationId))
+	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationReadParamsValidator)
 	async get(@Path() translationId: number): Promise<PublicTranslationAttributes> {
 		const translation = await this.translationRepository.read(translationId);
@@ -107,6 +110,7 @@ export class TranslationsController extends BaseController {
 	@SuccessResponse(200, "Returns updated translation")
 	@DescribeAction("translations/update")
 	@DescribeResource("Translation", ({ params }) => Number(params.translationId))
+	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationUpdateParamsValidator)
 	async update(
 		@Path() translationId: number,
