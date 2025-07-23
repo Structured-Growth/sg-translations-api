@@ -9,6 +9,7 @@ import {
 	SearchResultInterface,
 	ValidateFuncArgs,
 	I18nType,
+	HashFields,
 } from "@structured-growth/microservice-sdk";
 import { pick } from "lodash";
 import { ClientAttributes } from "../../../database/models/client";
@@ -63,6 +64,7 @@ export class ClientsController extends BaseController {
 	@DescribeAction("clients/search")
 	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
 	@DescribeResource("Client", ({ query }) => query.id?.map(Number))
+	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientSearchParamsValidator)
 	async search(@Queries() query: ClientSearchParamsInterface): Promise<SearchResultInterface<PublicClientAttributes>> {
 		const { data, ...result } = await this.clientRepository.search(query);
@@ -84,6 +86,7 @@ export class ClientsController extends BaseController {
 	@SuccessResponse(201, "Returns created сlient")
 	@DescribeAction("clients/create")
 	@DescribeResource("Organization", ({ body }) => Number(body.orgId))
+	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientCreateParamsValidator)
 	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
 		const client = await this.clientService.create(body);
@@ -107,6 +110,7 @@ export class ClientsController extends BaseController {
 	@SuccessResponse(200, "Returns client")
 	@DescribeAction("clients/read")
 	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientReadParamsValidator)
 	async get(@Path() clientId: number): Promise<PublicClientAttributes> {
 		const client = await this.clientRepository.read(clientId);
@@ -131,6 +135,7 @@ export class ClientsController extends BaseController {
 	@SuccessResponse(200, "Returns updated сlient")
 	@DescribeAction("clients/update")
 	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientUpdateParamsValidator)
 	async update(
 		@Path() clientId: number,
