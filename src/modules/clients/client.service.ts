@@ -15,6 +15,8 @@ import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/clie
 import { TranslationAttributes } from "../../../database/models/translation";
 import { ClientGetLocalizedTranslationParamsInterface } from "../../interfaces/client-get-localized-translation-params.interface";
 
+// For devops
+
 @autoInjectable()
 export class ClientService {
 	private i18n: I18nType;
