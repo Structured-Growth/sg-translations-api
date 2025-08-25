@@ -33,6 +33,7 @@ router.get(pathPrefix + '/v1/tokens/:tokenId', handleRequest(Controllers.TokensC
 
 //SystemController
 router.post(pathPrefix + '/v1/system/migrate', handleRequest(Controllers.SystemController, "migrate", handlerOpts));
+router.post(pathPrefix + '/v1/system/i18n-upload', handleRequest(Controllers.SystemController, "uploadI18n", handlerOpts));
 
 //PingController
 router.get(pathPrefix + '/v1/ping/alive', handleRequest(Controllers.PingController, "pingGet", handlerOpts));
@@ -66,6 +67,7 @@ export const actionToRouteMap = {
 	"TokensController.search": 'get /v1/tokens',
 	"TokensController.get": 'get /v1/tokens/:tokenId',
 	"SystemController.migrate": 'post /v1/system/migrate',
+	"SystemController.uploadI18n": 'post /v1/system/i18n-upload',
 	"PingController.pingGet": 'get /v1/ping/alive',
 	"ClientsController.search": 'get /v1/clients',
 	"ClientsController.create": 'post /v1/clients',
