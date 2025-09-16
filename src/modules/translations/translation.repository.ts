@@ -33,7 +33,12 @@ export class TranslationRepository
 		params.clientId && (where["clientId"] = params.clientId);
 		params.tokenId && (where["tokenId"] = { [Op.in]: params.tokenId });
 		params.id && (where["id"] = { [Op.in]: params.id });
-		params.locales && (where["locale"] = { [Op.in]: params.locales });
+
+		if (params.locales?.length > 0) {
+			where["locale"] = {
+				[Op.or]: params.locales.map((str) => ({ [Op.iLike]: str.replace(/\*/g, "%") })),
+			};
+		}
 
 		const { rows, count } = await Translation.findAndCountAll({
 			where,
