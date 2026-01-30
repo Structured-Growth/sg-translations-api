@@ -62,7 +62,7 @@ export class ClientsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of clients")
 	@DescribeAction("clients/search")
-	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
+	@DescribeResource("Organization", ({ query }) => [Number(query.orgId)])
 	@DescribeResource("Client", ({ query }) => query.id?.map(Number))
 	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientSearchParamsValidator)
@@ -85,7 +85,7 @@ export class ClientsController extends BaseController {
 	@Post("/")
 	@SuccessResponse(201, "Returns created сlient")
 	@DescribeAction("clients/create")
-	@DescribeResource("Organization", ({ body }) => Number(body.orgId))
+	@DescribeResource("Organization", ({ body }) => [Number(body.orgId)])
 	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientCreateParamsValidator)
 	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
@@ -109,7 +109,7 @@ export class ClientsController extends BaseController {
 	@Get("/:clientId")
 	@SuccessResponse(200, "Returns client")
 	@DescribeAction("clients/read")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientReadParamsValidator)
 	async get(@Path() clientId: number): Promise<PublicClientAttributes> {
@@ -134,7 +134,7 @@ export class ClientsController extends BaseController {
 	@Put("/:clientId")
 	@SuccessResponse(200, "Returns updated сlient")
 	@DescribeAction("clients/update")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientUpdateParamsValidator)
 	async update(
@@ -161,7 +161,7 @@ export class ClientsController extends BaseController {
 	@Delete("/:clientId")
 	@SuccessResponse(204, "Returns nothing")
 	@DescribeAction("clients/delete")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@ValidateFuncArgs(ClientDeleteParamsValidator)
 	async delete(@Path() clientId: number): Promise<void> {
 		const client = await this.clientRepository.read(clientId);
