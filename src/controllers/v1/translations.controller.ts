@@ -58,8 +58,8 @@ export class TranslationsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of translations")
 	@DescribeAction("translations/search")
-	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
-	@DescribeResource("Client", ({ query }) => Number(query.clientId))
+	@DescribeResource("Organization", ({ query }) => [Number(query.orgId)])
+	@DescribeResource("Client", ({ query }) => [Number(query.clientId)])
 	@DescribeResource("Translation", ({ query }) => query.id?.map(Number))
 	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationSearchParamsValidator)
@@ -84,7 +84,7 @@ export class TranslationsController extends BaseController {
 	@Get("/:translationId")
 	@SuccessResponse(200, "Returns translation")
 	@DescribeAction("translations/read")
-	@DescribeResource("Translation", ({ params }) => Number(params.translationId))
+	@DescribeResource("Translation", ({ params }) => [Number(params.translationId)])
 	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationReadParamsValidator)
 	async get(@Path() translationId: number): Promise<PublicTranslationAttributes> {
@@ -109,7 +109,7 @@ export class TranslationsController extends BaseController {
 	@Put("/:translationId")
 	@SuccessResponse(200, "Returns updated translation")
 	@DescribeAction("translations/update")
-	@DescribeResource("Translation", ({ params }) => Number(params.translationId))
+	@DescribeResource("Translation", ({ params }) => [Number(params.translationId)])
 	@HashFields(["text"])
 	@ValidateFuncArgs(TranslationUpdateParamsValidator)
 	async update(

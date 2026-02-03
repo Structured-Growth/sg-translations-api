@@ -58,7 +58,7 @@ export class JobsController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of jobs")
 	@DescribeAction("jobs/search")
-	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
+	@DescribeResource("Organization", ({ query }) => [Number(query.orgId)])
 	@DescribeResource("Job", ({ query }) => query.id?.map(Number))
 	@HashFields(["clientName"])
 	@ValidateFuncArgs(JobSearchParamsValidator)
@@ -81,7 +81,7 @@ export class JobsController extends BaseController {
 	@Get("/:jobId")
 	@SuccessResponse(200, "Returns job")
 	@DescribeAction("jobs/read")
-	@DescribeResource("Job", ({ params }) => Number(params.jobId))
+	@DescribeResource("Job", ({ params }) => [Number(params.jobId)])
 	@HashFields(["clientName"])
 	@ValidateFuncArgs(JobReadParamsValidator)
 	async get(@Path() jobId: number): Promise<PublicJobAttributes> {
@@ -104,7 +104,7 @@ export class JobsController extends BaseController {
 	@Delete("/:jobId")
 	@SuccessResponse(204, "Returns nothing")
 	@DescribeAction("jobs/delete")
-	@DescribeResource("Job", ({ params }) => Number(params.jobId))
+	@DescribeResource("Job", ({ params }) => [Number(params.jobId)])
 	@ValidateFuncArgs(JobDeleteParamsValidator)
 	async delete(@Path() jobId: number): Promise<void> {
 		const job = await this.jobRepository.read(jobId);

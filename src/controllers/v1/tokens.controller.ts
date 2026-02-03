@@ -41,8 +41,8 @@ export class TokensController extends BaseController {
 	@Get("/")
 	@SuccessResponse(200, "Returns list of tokens")
 	@DescribeAction("tokens/search")
-	@DescribeResource("Organization", ({ query }) => Number(query.orgId))
-	@DescribeResource("Client", ({ query }) => Number(query.clientId))
+	@DescribeResource("Organization", ({ query }) => [Number(query.orgId)])
+	@DescribeResource("Client", ({ query }) => [Number(query.clientId)])
 	@DescribeResource("Token", ({ query }) => query.id?.map(Number))
 	@ValidateFuncArgs(TokenSearchParamsValidator)
 	async search(@Queries() query: TokenSearchParamsInterface): Promise<SearchResultInterface<PublicTokenAttributes>> {
@@ -64,7 +64,7 @@ export class TokensController extends BaseController {
 	@Get("/:tokenId")
 	@SuccessResponse(200, "Returns token")
 	@DescribeAction("tokens/read")
-	@DescribeResource("Token", ({ params }) => Number(params.tokenId))
+	@DescribeResource("Token", ({ params }) => [Number(params.tokenId)])
 	@ValidateFuncArgs(TokenReadParamsValidator)
 	async get(@Path() tokenId: number): Promise<PublicTokenAttributes> {
 		const token = await this.tokenRepository.read(tokenId);
