@@ -37,7 +37,7 @@ export class TranslationSetController extends BaseController {
 	@Get("/:clientId/:locale")
 	@SuccessResponse(200, "Returns translation set")
 	@DescribeAction("translation-set/get")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@ValidateFuncArgs(ClientGetLocalizedTranslationParamsValidator)
 	async getTranslationSet(
 		@Path() clientId: number,
@@ -54,7 +54,7 @@ export class TranslationSetController extends BaseController {
 	@Post("/:clientId/translate")
 	@SuccessResponse(204, "Success")
 	@DescribeAction("translation-set/translate")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@ValidateFuncArgs(ClientCreateDynamicTranslateParamsValidator)
 	async translate(
 		@Path() clientId: number,
@@ -72,7 +72,7 @@ export class TranslationSetController extends BaseController {
 	@Post("/:clientId/upload")
 	@SuccessResponse(204, "Success")
 	@DescribeAction("clients/translation/upload")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@ValidateFuncArgs(ClientCreateTranslationParamsValidator)
 	async uploadTranslation(
 		@Path() clientId: number,
@@ -90,7 +90,7 @@ export class TranslationSetController extends BaseController {
 	@Post("/:clientId/update")
 	@SuccessResponse(204, "Success")
 	@DescribeAction("clients/translation/update")
-	@DescribeResource("Client", ({ params }) => Number(params.clientId))
+	@DescribeResource("Client", ({ params }) => [Number(params.clientId)])
 	@ValidateFuncArgs(ClientUpdateTranslationParamsValidator)
 	async updateTranslation(
 		@Path() clientId: number,
