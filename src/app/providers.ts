@@ -10,6 +10,8 @@ import {
 	PolicyService,
 	eventBusProviders,
 	EventbusService,
+	queueProviders,
+	QueueService,
 } from "@structured-growth/microservice-sdk";
 import { loadEnvironment } from "./load-environment";
 import { ClientRepository } from "../modules/clients/client.repository";
@@ -54,8 +56,12 @@ container.register("internalRequestsAllowed", { useValue: process.env.INTERNAL_R
 container.register("internalAuthenticationJwtSecret", { useValue: process.env.INTERNAL_AUTHENTICATION_JWT_SECRET });
 container.register("oAuthServiceGetUserUrl", { useValue: process.env.OAUTH_USER_URL });
 container.register("policiesServiceUrl", { useValue: process.env.POLICY_SERVICE_URL });
+container.register("sqsQueueUrl", { useValue: process.env.SQS_QUEUE_URL });
 container.register("AuthService", AuthService);
 container.register("PolicyService", PolicyService);
+
+container.register("QueueProvider", queueProviders[process.env.QUEUE_PROVIDER || "TestQueueProvider"]);
+container.register("QueueService", QueueService, { lifecycle: Lifecycle.Singleton });
 
 container.register("eventbusName", { useValue: process.env.EVENTBUS_NAME || "sg-eventbus-dev" });
 container.register("EventbusProvider", eventBusProviders[process.env.EVENTBUS_PROVIDER || "TestEventbusProvider"]);
