@@ -50,6 +50,9 @@ router.get(pathPrefix + '/v1/jobs', handleRequest(Controllers.JobsController, "s
 router.get(pathPrefix + '/v1/jobs/:jobId', handleRequest(Controllers.JobsController, "get", handlerOpts));
 router.delete(pathPrefix + '/v1/jobs/:jobId', handleRequest(Controllers.JobsController, "delete", handlerOpts));
 
+//DocsController
+router.get(pathPrefix + '/v1/docs/swagger.json', handleRequest(Controllers.DocsController, "getSwagger", handlerOpts));
+
 //ResolverController
 router.get(pathPrefix + '/v1/resolver/resolve', handleRequest(Controllers.ResolverController, "resolve", handlerOpts));
 router.get(pathPrefix + '/v1/resolver/actions', handleRequest(Controllers.ResolverController, "actions", handlerOpts));
@@ -77,6 +80,7 @@ export const actionToRouteMap = {
 	"JobsController.search": 'get /v1/jobs',
 	"JobsController.get": 'get /v1/jobs/:jobId',
 	"JobsController.delete": 'delete /v1/jobs/:jobId',
+	"DocsController.getSwagger": 'get /v1/docs/swagger.json',
 	"ResolverController.resolve": 'get /v1/resolver/resolve',
 	"ResolverController.actions": 'get /v1/resolver/actions',
 	"ResolverController.models": 'get /v1/resolver/models',
