@@ -6,3 +6,4 @@ export { TokensController } from "./tokens.controller";
 export { TranslationsController } from "./translations.controller";
 export { JobsController } from "./jobs.controller";
 export { TranslationSetController } from "./translation-set.controller";
+export { DocsController } from "./docs.controller";
