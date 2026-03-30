@@ -67,9 +67,7 @@ export class ClientService {
 		const client = await this.clientRepository.read(id);
 
 		if (!client) {
-			throw new NotFoundError(
-				`${this.i18n.__("error.client.name")} ${id} ${this.i18n.__("error.common.not_found")}`
-			);
+			throw new NotFoundError(`${this.i18n.__("error.client.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
 		}
 
 		const nextClient = {
