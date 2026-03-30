@@ -12,6 +12,7 @@ export function createClient(
 		clientName: string;
 		locales: string[];
 		defaultLocale: string;
+		metadata?: Record<string, unknown> | null;
 		contextPath: string;
 	}
 ) {
@@ -24,6 +25,7 @@ export function createClient(
 			clientName: options.clientName,
 			locales: options.locales,
 			defaultLocale: options.defaultLocale,
+			metadata: options.metadata,
 		});
 		assert.equal(statusCode, 201);
 		assert.isNumber(body.id);

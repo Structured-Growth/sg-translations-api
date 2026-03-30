@@ -2,12 +2,16 @@ import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { createClient } from "../../../common/create-client";
+import { seedClientCustomFields } from "../../../common/seed-custom-fields";
 
 describe("GET /api/v1/clients", () => {
 	const { server, context } = initTest();
+	const orgId = Math.floor(Math.random() * 100) + 1;
+
+	beforeEach(() => seedClientCustomFields(orgId));
 
 	createClient(server, context, {
-		orgId: Math.floor(Math.random() * 100) + 1,
+		orgId,
 		region: "us",
 		status: "active",
 		title: `TestClientName-${Date.now()}`,
@@ -15,6 +19,9 @@ describe("GET /api/v1/clients", () => {
 		locales: ["us-En", "pt-Pt"],
 		contextPath: "client",
 		defaultLocale: "us-En",
+		metadata: {
+			billingCode: "AA",
+		},
 	});
 
 	it("Should return 0 clients", async () => {
@@ -39,6 +46,18 @@ describe("GET /api/v1/clients", () => {
 		assert.equal(body.page, 1);
 		assert.equal(body.limit, 20);
 		assert.equal(body.total, 1);
+	});
+
+	it("Should return client filtered by metadata", async () => {
+		const { statusCode, body } = await server.get("/v1/clients").query({
+			orgId: context.client.orgId,
+			metadata: JSON.stringify({
+				billingCode: "AA",
+			}),
+		});
+		assert.equal(statusCode, 200);
+		assert.equal(body.data[0].id, context.client.id);
+		assert.equal(body.data[0].metadata.billingCode, "AA");
 	});
 
 	it("Should return validation error", async () => {

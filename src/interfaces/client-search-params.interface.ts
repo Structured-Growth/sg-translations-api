@@ -6,4 +6,5 @@ export interface ClientSearchParamsInterface extends Omit<DefaultSearchParamsInt
 	clientName?: string[];
 	locales?: string[];
 	defaultLocale?: string[];
+	metadata?: string;
 }
