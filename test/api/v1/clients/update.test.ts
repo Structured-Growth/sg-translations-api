@@ -8,7 +8,7 @@ describe("PUT /api/v1/clients/:clientId", () => {
 	const { server, context } = initTest();
 	const orgId = Math.floor(Math.random() * 100) + 1;
 
-	beforeEach(() => seedClientCustomFields(orgId));
+	before(() => seedClientCustomFields(orgId));
 
 	createClient(server, context, {
 		orgId,
@@ -46,33 +46,46 @@ describe("PUT /api/v1/clients/:clientId", () => {
 		assert.equal(body.metadata.billingCode, "BB");
 	});
 
-	it("Should allow null metadata", async () => {
+	it("Should keep metadata when it is omitted", async () => {
 		const { statusCode, body } = await server.put(`/v1/clients/${context.client.id}`).send({
-			metadata: null,
+			title: "Updated Client",
 		});
+
 		assert.equal(statusCode, 200);
-		assert.isNull(body.metadata);
+		assert.equal(body.metadata.billingCode, "BB");
 	});
 
-	it("Should return validation error for invalid metadata", async () => {
+	it("Should return validation error for null metadata", async () => {
+		const { statusCode, body } = await server.put(`/v1/clients/${context.client.id}`).send({
+			status: "deleted",
+			title: 1,
+			clientName: 2,
+			locales: "bad",
+			defaultLocale: 3,
+			metadata: "bad",
+		});
+
+		assert.equal(statusCode, 422);
+		assert.equal(body.name, "ValidationError");
+		assert.isString(body.validation.body.status[0]);
+		assert.isString(body.validation.body.title[0]);
+		assert.isString(body.validation.body.clientName[0]);
+		assert.isString(body.validation.body.locales[0]);
+		assert.isString(body.validation.body.defaultLocale[0]);
+		assert.isString(body.validation.body.metadata[0]);
+	});
+
+	it("Should return custom fields validation error for invalid metadata", async () => {
 		const { statusCode, body } = await server.put(`/v1/clients/${context.client.id}`).send({
 			metadata: {
-				billingCode: "A",
+				billingCode: {
+					invalid: true,
+				},
 			},
 		});
 		assert.equal(statusCode, 422);
-		assert.isString(body.validation.body.metadata.billingCode[0]);
-	});
-
-	it("Should return validation error", async () => {
-		const { statusCode, body } = await server.put(`/v1/clients/${context.client.id}`).send({
-			status: "deleted",
-		});
-		assert.equal(statusCode, 422);
-		assert.isDefined(body.validation);
 		assert.equal(body.name, "ValidationError");
-		assert.isString(body.message);
-		assert.isString(body.validation.body.status[0]);
+		assert.isString(body.validation.body.metadata.billingCode[0]);
 	});
 
 	it("Should return validation error if id is wrong", async () => {

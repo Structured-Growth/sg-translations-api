@@ -1,5 +1,6 @@
-import { joi, RegionEnum } from "@structured-growth/microservice-sdk";
+import { RegionEnum } from "@structured-growth/microservice-sdk";
 import CustomField from "../../database/models/custom-field";
+import { customFieldAlternativesSchema } from "./custom-field-schema";
 
 export async function seedClientCustomFields(orgId: number): Promise<void> {
 	await CustomField.create({
@@ -8,7 +9,7 @@ export async function seedClientCustomFields(orgId: number): Promise<void> {
 		entity: "Client",
 		title: "Billing Code",
 		name: "billingCode",
-		schema: joi.string().min(2).describe(),
+		schema: customFieldAlternativesSchema,
 		status: "active",
 	});
 }

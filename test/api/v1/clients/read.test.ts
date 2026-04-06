@@ -8,7 +8,7 @@ describe("GET /api/v1/clients/:clientId", () => {
 	const { server, context } = initTest();
 	const orgId = Math.floor(Math.random() * 100) + 1;
 
-	beforeEach(() => seedClientCustomFields(orgId));
+	before(() => seedClientCustomFields(orgId));
 
 	createClient(server, context, {
 		orgId,

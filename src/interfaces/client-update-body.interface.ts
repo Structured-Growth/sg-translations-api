@@ -6,5 +6,5 @@ export interface ClientUpdateBodyInterface {
 	clientName?: string;
 	locales?: ClientAttributes["locales"];
 	defaultLocale?: string;
-	metadata?: Record<string, unknown> | null;
+	metadata?: Record<string, unknown>;
 }

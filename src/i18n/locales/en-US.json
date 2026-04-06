@@ -32,7 +32,8 @@
       "none_clients": "None of the clients with tokens ids were found"
     },
     "custom_field": {
-      "name": "Custom Field"
+      "name": "Custom Field",
+      "custom_field_created": "Custom field with the same name already exists"
     }
   },
   "validator": {

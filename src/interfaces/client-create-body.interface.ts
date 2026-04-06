@@ -7,5 +7,5 @@ export interface ClientCreateBodyInterface {
 	clientName: string;
 	locales: string[];
 	defaultLocale: string;
-	metadata?: Record<string, unknown> | null;
+	metadata?: Record<string, unknown>;
 }

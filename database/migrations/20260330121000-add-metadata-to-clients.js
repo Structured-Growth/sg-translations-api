@@ -13,7 +13,8 @@ module.exports = {
 			"metadata",
 			{
 				type: Sequelize.JSONB,
-				allowNull: true,
+				allowNull: false,
+				defaultValue: {},
 			}
 		);
 	},

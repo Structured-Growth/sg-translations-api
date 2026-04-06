@@ -6,5 +6,9 @@ export interface ClientSearchParamsInterface extends Omit<DefaultSearchParamsInt
 	clientName?: string[];
 	locales?: string[];
 	defaultLocale?: string[];
-	metadata?: string;
+	/**
+	 * Search by custom entity fields.
+	 * Example: metadata[billingCode]=AA
+	 */
+	"metadata[customFieldName]"?: string;
 }
