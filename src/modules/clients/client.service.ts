@@ -14,9 +14,8 @@ import convertToObject from "../../helpers/convert-to-object";
 import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/client-create-dynamic-translate-body.interface";
 import { TranslationAttributes } from "../../../database/models/translation";
 import { ClientGetLocalizedTranslationParamsInterface } from "../../interfaces/client-get-localized-translation-params.interface";
-
-// For devops
-
+import { ClientUpdateBodyInterface } from "../../interfaces/client-update-body.interface";
+import { CustomFieldService } from "../custom-fields/custom-field.service";
 @autoInjectable()
 export class ClientService {
 	private i18n: I18nType;
@@ -25,12 +24,13 @@ export class ClientService {
 		@inject("TokenService") private tokenService: TokenService,
 		@inject("TranslationService") private translationService: TranslationService,
 		@inject("JobService") private jobService: JobService,
+		@inject("CustomFieldService") private customFieldService: CustomFieldService,
 		@inject("i18n") private getI18n: () => I18nType
 	) {
 		this.i18n = this.getI18n();
 	}
 
-	public async create(params: ClientCreateBodyInterface): Promise<Client> {
+	public async create(params: ClientCreateBodyInterface, parentOrgIds: number[] = []): Promise<Client> {
 		const { clientName } = params;
 
 		const [countResult]: { count: number }[] = await Client.count({
@@ -46,6 +46,8 @@ export class ClientService {
 			});
 		}
 
+		await this.customFieldService.validate("Client", params.metadata ?? {}, [params.orgId, ...parentOrgIds]);
+
 		return this.clientRepository.create({
 			orgId: params.orgId,
 			region: params.region,
@@ -54,7 +56,24 @@ export class ClientService {
 			clientName: params.clientName,
 			locales: params.locales,
 			defaultLocale: params.defaultLocale,
+			metadata: params.metadata ?? {},
 		});
+	}
+
+	public async update(id: number, params: ClientUpdateBodyInterface, parentOrgIds: number[] = []): Promise<Client> {
+		const client = await this.clientRepository.read(id);
+
+		if (!client) {
+			throw new NotFoundError(`${this.i18n.__("error.client.name")} ${id} ${this.i18n.__("error.common.not_found")}`);
+		}
+
+		await this.customFieldService.validate(
+			"Client",
+			params.metadata !== undefined ? params.metadata : client.metadata,
+			[client.orgId, ...parentOrgIds]
+		);
+
+		return this.clientRepository.update(id, params);
 	}
 
 	public async createJobTranslation(

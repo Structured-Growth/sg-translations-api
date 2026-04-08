@@ -30,6 +30,10 @@
     "translation": {
       "name": "Translation",
       "none_clients": "None of the clients with tokens ids were found"
+    },
+    "custom_field": {
+      "name": "Custom Field",
+      "custom_field_created": "Custom field with the same name already exists"
     }
   },
   "validator": {
@@ -38,7 +42,8 @@
       "arn": "Entity ARNs",
       "page": "Page",
       "limit": "Limit",
-      "sort": "Sort"
+      "sort": "Sort",
+      "metadata": "Metadata"
     },
     "clients": {
       "orgId": "Organization Id",
@@ -48,7 +53,19 @@
       "clientName": "Client Name",
       "locales": "Locales",
       "defaultLocale": "Default Locale",
-      "clientId": "Client Id"
+      "clientId": "Client Id",
+      "metadata": "Metadata"
+    },
+    "customFields": {
+      "orgId": "Organization Id",
+      "region": "Region",
+      "entity": "Entity",
+      "title": "Title",
+      "name": "Name",
+      "schema": "Schema",
+      "status": "Status",
+      "customFieldId": "Custom Field Id",
+      "includeInherited": "Include Inherited"
     },
     "jobs": {
       "orgId": "Organization Id",

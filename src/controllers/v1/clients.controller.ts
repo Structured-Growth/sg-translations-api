@@ -37,6 +37,7 @@ const publicClientAttributes = [
 	"clientName",
 	"locales",
 	"defaultLocale",
+	"metadata",
 ] as const;
 type ClientKeys = (typeof publicClientAttributes)[number];
 type PublicClientAttributes = Pick<ClientAttributes, ClientKeys>;
@@ -89,7 +90,7 @@ export class ClientsController extends BaseController {
 	@HashFields(["clientName", "title"])
 	@ValidateFuncArgs(ClientCreateParamsValidator)
 	async create(@Queries() query: {}, @Body() body: ClientCreateBodyInterface): Promise<PublicClientAttributes> {
-		const client = await this.clientService.create(body);
+		const client = await this.clientService.create(body, this.principal.parentOrgIds ?? []);
 		this.response.status(201);
 
 		await this.eventBus.publish(
@@ -142,7 +143,7 @@ export class ClientsController extends BaseController {
 		@Queries() query: {},
 		@Body() body: ClientUpdateBodyInterface
 	): Promise<PublicClientAttributes> {
-		const client = await this.clientRepository.update(clientId, body);
+		const client = await this.clientService.update(clientId, body, this.principal.parentOrgIds ?? []);
 
 		await this.eventBus.publish(
 			new EventMutation(this.principal.arn, client.arn, `${this.appPrefix}:clients/update`, JSON.stringify(body))
