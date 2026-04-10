@@ -2,12 +2,16 @@ import "../../../../src/app/providers";
 import { assert } from "chai";
 import { initTest } from "../../../common/init-test";
 import { createClient } from "../../../common/create-client";
+import { seedClientCustomFields } from "../../../common/seed-custom-fields";
 
 describe("GET /api/v1/clients/:clientId", () => {
 	const { server, context } = initTest();
+	const orgId = Math.floor(Math.random() * 100) + 1;
+
+	before(() => seedClientCustomFields(orgId));
 
 	createClient(server, context, {
-		orgId: Math.floor(Math.random() * 100) + 1,
+		orgId,
 		region: "us",
 		status: "active",
 		title: `TestClientName-${Date.now()}`,
@@ -15,6 +19,9 @@ describe("GET /api/v1/clients/:clientId", () => {
 		locales: ["us-En", "pt-Pt"],
 		contextPath: "client",
 		defaultLocale: "us-En",
+		metadata: {
+			billingCode: "AA",
+		},
 	});
 
 	it("Should read client", async () => {
@@ -25,6 +32,7 @@ describe("GET /api/v1/clients/:clientId", () => {
 		assert.isString(body.updatedAt);
 		assert.equal(body.status, "active");
 		assert.isString(body.arn);
+		assert.equal(body.metadata.billingCode, "AA");
 	});
 
 	it("Should return is client does not exist", async () => {

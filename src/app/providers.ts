@@ -22,6 +22,8 @@ import { TranslationRepository } from "../modules/translations/translation.repos
 import { TranslationService } from "../modules/translations/translation.service";
 import { JobRepository } from "../modules/jobs/job.repository";
 import { JobService } from "../modules/jobs/job.service";
+import { CustomFieldRepository } from "../modules/custom-fields/custom-field.repository";
+import { CustomFieldService } from "../modules/custom-fields/custom-field.service";
 
 // load and validate env variables
 loadEnvironment();
@@ -46,6 +48,7 @@ container.register("ClientService", ClientService);
 container.register("TranslationService", TranslationService);
 container.register("TokenService", TokenService);
 container.register("JobService", JobService);
+container.register("CustomFieldService", CustomFieldService);
 
 container.register("authenticationEnabled", { useValue: process.env.AUTHENTICATION_ENABLED === "true" });
 container.register("authorizationEnabled", { useValue: process.env.AUTHORIZATION_ENABLED === "true" });
@@ -72,3 +75,4 @@ container.register("ClientRepository", ClientRepository);
 container.register("TokenRepository", TokenRepository);
 container.register("TranslationRepository", TranslationRepository);
 container.register("JobRepository", JobRepository);
+container.register("CustomFieldRepository", CustomFieldRepository);
