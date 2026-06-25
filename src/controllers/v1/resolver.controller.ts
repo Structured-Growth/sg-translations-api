@@ -1,10 +1,11 @@
 import { Get, Route, Tags, Queries, SuccessResponse, OperationId } from "tsoa";
 import {
-	inject,
 	autoInjectable,
 	BaseController,
 	DescribeAction,
 	NotFoundError,
+	EmitsManifestEntryInterface,
+	readGeneratedEmitsManifest,
 } from "@structured-growth/microservice-sdk";
 import * as controllers from "./index";
 import { ResolveQueryParamsInterface } from "../../interfaces/resolve-query-params.interface";
@@ -100,6 +101,19 @@ export class ResolverController extends BaseController {
 
 		return {
 			data: models,
+		};
+	}
+
+	/**
+	 * List all events emitted by the microservice
+	 */
+	@OperationId("List events")
+	@Get("/events")
+	@SuccessResponse(200, "Returns events")
+	@DescribeAction("resolve/events")
+	async events(): Promise<{ data: EmitsManifestEntryInterface[] }> {
+		return {
+			data: readGeneratedEmitsManifest(),
 		};
 	}
 }
