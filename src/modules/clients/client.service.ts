@@ -1,5 +1,13 @@
-import { autoInjectable, inject, NotFoundError, ValidationError, I18nType } from "@structured-growth/microservice-sdk";
-import Client from "../../../database/models/client";
+import {
+	autoInjectable,
+	inject,
+	NotFoundError,
+	ValidationError,
+	I18nType,
+	EventbusService,
+	Emits,
+} from "@structured-growth/microservice-sdk";
+import Client, { ClientAttributes } from "../../../database/models/client";
 import { TokenAttributes } from "../../../database/models/token";
 import { ClientCreateBodyInterface } from "../../interfaces/client-create-body.interface";
 import { ClientRepository } from "./client.repository";
@@ -16,6 +24,7 @@ import { TranslationAttributes } from "../../../database/models/translation";
 import { ClientGetLocalizedTranslationParamsInterface } from "../../interfaces/client-get-localized-translation-params.interface";
 import { ClientUpdateBodyInterface } from "../../interfaces/client-update-body.interface";
 import { CustomFieldService } from "../custom-fields/custom-field.service";
+
 @autoInjectable()
 export class ClientService {
 	private i18n: I18nType;
@@ -25,11 +34,13 @@ export class ClientService {
 		@inject("TranslationService") private translationService: TranslationService,
 		@inject("JobService") private jobService: JobService,
 		@inject("CustomFieldService") private customFieldService: CustomFieldService,
+		@inject("EventbusService") private eventBus: EventbusService,
 		@inject("i18n") private getI18n: () => I18nType
 	) {
 		this.i18n = this.getI18n();
 	}
 
+	@Emits<ClientAttributes>("events/translation-clients/created", [Client])
 	public async create(params: ClientCreateBodyInterface, parentOrgIds: number[] = []): Promise<Client> {
 		const { clientName } = params;
 
@@ -48,7 +59,7 @@ export class ClientService {
 
 		await this.customFieldService.validate("Client", params.metadata ?? {}, [params.orgId, ...parentOrgIds]);
 
-		return this.clientRepository.create({
+		const client = await this.clientRepository.create({
 			orgId: params.orgId,
 			region: params.region,
 			status: params.status || "inactive",
@@ -58,6 +69,14 @@ export class ClientService {
 			defaultLocale: params.defaultLocale,
 			metadata: params.metadata ?? {},
 		});
+
+		await this.eventBus.publish({
+			arn: `events/translation-clients/created`,
+			data: client.toJSON(),
+			resources: [client.arn],
+		});
+
+		return client;
 	}
 
 	public async update(id: number, params: ClientUpdateBodyInterface, parentOrgIds: number[] = []): Promise<Client> {

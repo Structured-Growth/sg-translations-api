@@ -7,7 +7,6 @@ import {
 	inject,
 	ValidateFuncArgs,
 } from "@structured-growth/microservice-sdk";
-import { ClientRepository } from "../../modules/clients/client.repository";
 import { ClientService } from "../../modules/clients/client.service";
 import { ClientCreateTranslationBodyInterface } from "../../interfaces/client-create-translation-body.interface";
 import { ClientCreateDynamicTranslateBodyInterface } from "../../interfaces/client-create-dynamic-translate-body.interface";
@@ -22,10 +21,7 @@ import { ClientUpdateTranslationParamsValidator } from "../../validators/client-
 @Tags("Translation set")
 @autoInjectable()
 export class TranslationSetController extends BaseController {
-	constructor(
-		@inject("ClientRepository") private clientRepository: ClientRepository,
-		@inject("ClientService") private clientService: ClientService
-	) {
+	constructor(@inject("ClientService") private clientService: ClientService) {
 		super();
 	}
 
